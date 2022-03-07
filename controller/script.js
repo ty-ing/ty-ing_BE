@@ -71,3 +71,20 @@ module.exports.scriptTag = async (req, res) => {
     });
   }
 };
+
+module.exports.scriptDetail = async (req, res) => {
+  try {
+    const scriptId = req.params;
+    const script = await Script.findOne(scriptId);
+    res.json({
+      script,
+      ok: true,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(200).send({
+      ok: false,
+      errorMessage: "해당 값이 존재하지 않습니다.",
+    });
+  }
+};

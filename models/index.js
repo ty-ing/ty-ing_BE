@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 
 const connect = () => {
-    mongoose.connect('mongodb://dbadmin:z!+Qz8K?#9;rSwHK@localhost:27017/Real-project', {
-        useNEWURLParser: true,
+    mongoose.connect('mongodb://dbadmin:z%23%2BQz8K%3F%239%3BrSwHK@localhost:27017/Real-project',
+     {
+        useNewUrlParser: true,
         ignoreUndefined: true
     }).catch(err => console.log(err));
 };

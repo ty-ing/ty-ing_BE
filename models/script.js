@@ -18,6 +18,11 @@ const ScriptSchema = new Schema({
     require: true,
   },
 
+  scriptListId : {
+      type: Array,
+      require: true,
+  },
+
   scriptParagraph: {
     type: Array,
     require: true,

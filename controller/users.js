@@ -143,6 +143,8 @@ const auth = async (req, res) => {
       ok: true,
       message: "로그인 정보 불러오기 성공",
       id: user.id,
+      nickname: user.nickname,
+      userId: user.userId,
     });
   } catch (error) {
     res.json({

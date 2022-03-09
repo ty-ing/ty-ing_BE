@@ -10,11 +10,26 @@ connect();
 const cors = require('cors');
 app.use(cors());
 
-const scriptRouter = require("./routes/script");
-const usersRouter = require("./routes/users");
+//Request 로그 남기는 미들웨어
+const requestMiddleware = (req, res, next) => {
+  console.log(
+    "Request URL:",
+    req.originalUrl,
+    " - ",
+    new Date(+new Date() + 3240 * 10000)
+      .toISOString()
+      .replace("T", " ")
+      .replace(/\..*/, "")
+  );
+  next();
+};
 
+app.use(requestMiddleware); // request log
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+const scriptRouter = require("./routes/script");
+const usersRouter = require("./routes/users");
 
 app.use("/api", [scriptRouter]);
 app.use("/api", [usersRouter]);

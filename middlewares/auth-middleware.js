@@ -19,7 +19,7 @@ module.exports = (req, res, next) => {
   try {
     const { id } = jwt.verify(authToken, process.env.TOKENKEY);
   
-    Users.findOne(id).then((user) => {
+    Users.findOne({id}).then((user) => {
       res.locals.user = user; //굳이 데이터베이스에서 사용자 정보를 가져오지 않게 할 수 있도록 express가 제공하는 안전한 변수에 담아두고 언제나 꺼내서 사용할 수 있게함
       next();
     });

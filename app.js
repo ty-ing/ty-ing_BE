@@ -7,6 +7,9 @@ const port = 3000;
 const connect = require("./models");
 connect();
 
+const cors = require('cors');
+app.use(cors());
+
 const scriptRouter = require("./routes/script");
 const usersRouter = require("./routes/users");
 

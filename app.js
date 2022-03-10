@@ -10,6 +10,9 @@ connect();
 const cors = require('cors');
 app.use(cors());
 
+const helmet = require("helmet");
+app.use(helmet());
+
 //Request 로그 남기는 미들웨어
 const requestMiddleware = (req, res, next) => {
   console.log(
@@ -30,9 +33,11 @@ app.use(express.urlencoded({ extended: false }));
 
 const scriptRouter = require("./routes/script");
 const usersRouter = require("./routes/users");
+const opendictRouter = require("./routes/opendict_words");
 
 app.use("/api", [scriptRouter]);
 app.use("/api", [usersRouter]);
+app.use("/opendict", [opendictRouter]);
 
 app.listen(port, () => {
   console.log(`listening at http://localhost:${port}`);

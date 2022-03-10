@@ -4,8 +4,7 @@ const UsersSchema = new mongoose.Schema({
   userId: Number,
   pwd: String,
   nickname: String,
-  // snsId: String,
-  // provider: String,
+  provider: String,
   // username: String,
   // profileImg: String,
 });

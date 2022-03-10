@@ -155,10 +155,29 @@ const auth = async (req, res) => {
   }
 };
 
+const kakaoCallback = (req, res, next) => {
+  passport.authenticate(
+    "kakao",
+    { failureRedirect: "/" },
+    (err, user, info) => {
+      if (err) return next(err);
+      const { id, } = user;
+      const token = jwt.sign({ id, }, process.env.TOKENKEY);
+      result = {
+        token,
+        id: user.id,
+        nickname: user.nickname,
+      };
+      res.send({ user: result });
+    }
+  )(req, res, next);
+};
+
 module.exports = {
   idCheck, // 회원가입에서 아이디 중복검사
   nicknameCheck, // 회원가입에서 닉네임 중복검사
   signup, // 회원가입
   login, // 로그인
-  auth, // 로그인 정보 불러오기 (auth-middleware에 저장된 거)
+  auth,
+  kakaoCallback // 로그인 정보 불러오기 (auth-middleware에 저장된 거)
 };

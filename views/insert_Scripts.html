@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>insert_Scripts</title>
+    <link
+            rel="stylesheet"
+            href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+            integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+            crossorigin="anonymous"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js""></script>
+</head>
+<body>
+    <script>
+        function insert_Scripts() {
+            console.log("insert Script..")
+            $.ajax({
+                type: "post",
+                url: '/api/script',
+                data: {
+                    scriptTitle:$('#scriptTitle').val(),
+                    scriptTag:$('#scriptTag').val(),
+                    scriptParagraph:$('#scriptParagraph').val(),
+                },
+                success : function (response) {
+                   try {
+                       if (response.ok === true) {
+                           console.log(response)
+                           alert("스크립트 등록 완료")
+                       }
+                   } catch (error) {
+                       alert("에러 발생")
+                   }
+                }
+            })
+        }
+    </script>
+    <div>
+        <div class="form-group">
+            <label>제목</label>
+            <input type="text" class="form-control" id="scriptTitle">
+            </div>
+            <div class="form-group">
+            <label>태그(쉼표로 구분)</label>
+            <input type="text" class="form-control" id= "scriptTag">
+            </div>
+            <div class="form-group">
+            <label>문단(엔터로 구분)</label>
+            <textarea class="form-control" id= "scriptParagraph"></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="insert_Scripts()">등록하기</button> 
+            </div>
+    </div>
+</body>
+</html>

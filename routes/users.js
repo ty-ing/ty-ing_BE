@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middlewares/auth-middleware');
+const passport = require("passport");
 
-const { signup, idCheck, nicknameCheck, login, auth } = require('../controller/users'); 
+const { signup, idCheck, nicknameCheck, login, auth, kakaoCallback } = require('../controller/users'); 
 
 // 회원가입
 router.post('/signup', signup);
@@ -18,5 +19,9 @@ router.post('/login', login);
 
 // 로그인 정보 불러오기
 router.get('/auth', authMiddleware, auth);
+
+// 카카오 로그인
+router.get("/kakao", passport.authenticate("kakao"));
+router.get("/kakao/callback", kakaoCallback);
 
 module.exports = router;

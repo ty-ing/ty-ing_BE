@@ -30,6 +30,10 @@ const requestMiddleware = (req, res, next) => {
 app.use(requestMiddleware); // request log
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(express.static("views"))
+
+ app.engine('html', require('ejs').renderFile);
+ app.set('view engine', 'html');
 
 const scriptRouter = require("./routes/script");
 const usersRouter = require("./routes/users");
@@ -38,6 +42,9 @@ const opendictRouter = require("./routes/opendict_words");
 app.use("/api", [scriptRouter]);
 app.use("/api", [usersRouter]);
 app.use("/opendict", [opendictRouter]);
+
+app.get("/admin", (req, res ) => {
+  res.render('insert_Scripts.html')
 
 app.listen(port, () => {
   console.log(`listening at http://localhost:${port}`);

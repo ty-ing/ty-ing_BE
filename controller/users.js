@@ -172,9 +172,7 @@ const kakaoCallback = (req, res, next) => {
       };
       res.send({ user: result });
     }
-  ), (req, res) => {
-    res.redirect('/');
-  };
+  )(req, res, next);
 };
 
 module.exports = {

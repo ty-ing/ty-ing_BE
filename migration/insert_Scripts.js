@@ -4,7 +4,7 @@ module.exports.postScript = async (req, res) => {
        await Script.create({
           scriptTitle : req.body.scriptTitle,
           scriptCategory : req.body.scriptCategory,
-          scriptTag : req.body.scriptTag.split(","),
+          scriptTopic : req.body.scriptTopic.split(","),
           scriptParagraph : req.body.scriptParagraph.split("\n"),
           scriptSource : req.body.scriptSource
         });

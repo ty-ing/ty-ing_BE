@@ -11,7 +11,7 @@
             integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
             crossorigin="anonymous"
     />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="./jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <script>
@@ -22,8 +22,11 @@
                 url: '/api/script',
                 data: {
                     scriptTitle:$('#scriptTitle').val(),
-                    scriptTag:$('#scriptTag').val(),
+                    scriptType:$('#scriptType').val(),
+                    scriptCategory:$('#scriptCategory').val(),
+                    scriptTopic:$('#scriptTopic').val(),
                     scriptParagraph:$('#scriptParagraph').val(),
+                    scriptSource:$('#scriptSource').val(),
                 },
                 success : function (response) {
                    try {
@@ -42,14 +45,26 @@
         <div class="form-group">
             <label>제목</label>
             <input type="text" class="form-control" id="scriptTitle">
+        </div>
+            <div class="form-group">
+                <label>분류</label>
+                <input type="text" class="form-control" id="scriptType">
             </div>
             <div class="form-group">
-            <label>태그(쉼표로 구분)</label>
-            <input type="text" class="form-control" id= "scriptTag">
+                <label>카테고리</label>
+                <input type="text" class="form-control" id="scriptCategory">
             </div>
             <div class="form-group">
-            <label>문단(엔터로 구분)</label>
-            <textarea class="form-control" id= "scriptParagraph"></textarea>
+                <label>토픽(쉼표로 구분)</label>
+                <input type="text" class="form-control" id= "scriptTopic">
+            </div>
+            <div class="form-group">
+                <label>문단(엔터로 구분)</label>
+                <textarea class="form-control" id= "scriptParagraph"></textarea>
+            </div>
+            <div class="form-group">
+                <label>출처</label>
+                <textarea class="form-control" id= "scriptSource"></textarea>
             </div>
             <button class="btn btn-primary" onclick="insert_Scripts()">등록하기</button> 
             </div>

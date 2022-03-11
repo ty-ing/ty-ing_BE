@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken"); // jwt 토큰 사용
 const Joi = require("joi"); // 유효성 검증 라이브러리
 const bcrypt = require("bcrypt");
 const passport = require("passport");
+const res = require("express/lib/response");
 
 // 이메일 중복확인 validate 할 스키마 .
 const idCheckSchema = Joi.object({

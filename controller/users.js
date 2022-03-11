@@ -2,6 +2,7 @@ const Users = require("../models/users"); // 유저 스키마
 const jwt = require("jsonwebtoken"); // jwt 토큰 사용
 const Joi = require("joi"); // 유효성 검증 라이브러리
 const bcrypt = require("bcrypt");
+const passport = require("passport");
 
 // 이메일 중복확인 validate 할 스키마 .
 const idCheckSchema = Joi.object({
@@ -80,7 +81,7 @@ const signup = async (req, res) => {
     }
 
     const encodedPassword = bcrypt.hashSync(pwd, 10);
-    await Users.create({ id, userId: Date.now(), nickname, pwd: encodedPassword });
+    await Users.create({ id, userId: Date.now(), nickname, pwd: encodedPassword, provider: "local" });
     res.json({ ok: true, message: "회원가입이 성공적으로 완료되었습니다." });
   } catch (error) {
     res.status(400).json({

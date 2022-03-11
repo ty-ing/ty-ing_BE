@@ -8,14 +8,14 @@ module.exports = () => {
       new KakaoStrategy(
         {
           clientID: process.env.KAKAO_ID, // 카카오 로그인에서 발급받은 REST API 키
-          callbackURL: "http://localhost:3000/oauth/callback/kakao", // 카카오 로그인 Redirect URI 경로
+          callbackURL: "http://13.209.69.234/api/kakao/callback", // 카카오 로그인 Redirect URI 경로
         },
   
         // clientID에 카카오 앱 아이디 추가
         // callbackURL: 카카오 로그인 후 카카오가 결과를 전송해줄 URL
         // accessToken, refreshToken: 로그인 성공 후 카카오가 보내준 토큰
         // profile: 카카오가 보내준 유저 정보. profile의 정보를 바탕으로 회원가입
-        async (accessToken, refreshToen, profile, done) => {
+        async (accessToken, refreshToken, profile, done) => {
           console.log("토큰 :", accessToken);
           console.log("kakao profile", profile);
           try {

@@ -9,8 +9,13 @@ const ScriptSchema = new Schema({
     require: true,
   },
 
-  scriptCategory: { // 카테고리(토플..아이엘츠..)
-    type: Array,
+  scriptType: { // 종류(토플..아이엘츠..)
+    type: String,
+    require: true,
+  },
+
+  scriptCategory: {  // 카테고리(뉴욕타임즈, 대화문.)
+    type: String,
     require: true,
   },
 

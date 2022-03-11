@@ -22,6 +22,7 @@
                 url: '/api/script',
                 data: {
                     scriptTitle:$('#scriptTitle').val(),
+                    scriptType:$('#scriptType').val(),
                     scriptCategory:$('#scriptCategory').val(),
                     scriptTopic:$('#scriptTopic').val(),
                     scriptParagraph:$('#scriptParagraph').val(),
@@ -45,6 +46,10 @@
             <label>제목</label>
             <input type="text" class="form-control" id="scriptTitle">
         </div>
+            <div class="form-group">
+                <label>분류</label>
+                <input type="text" class="form-control" id="scriptType">
+            </div>
             <div class="form-group">
                 <label>카테고리</label>
                 <input type="text" class="form-control" id="scriptCategory">

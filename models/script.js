@@ -3,31 +3,37 @@ const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const { Schema } = mongoose;
 const ScriptSchema = new Schema({
-//   scriptId: {
-//     type: Number,
-//     require: true,
-//   },
 
-  scriptTitle: {
+  scriptTitle: { // 제목
     type: String,
     require: true,
   },
 
-  scriptTag: {
-    type: Array,
+  scriptType: { // 종류(토플..아이엘츠..)
+    type: String,
     require: true,
   },
 
-  scriptListId : {
+  scriptCategory: {  // 카테고리(뉴욕타임즈, 대화문.)
+    type: String,
+    require: true,
+  },
+
+  scriptTopic  : { // 토픽 (스포츠..건강..)
       type: Array,
       require: true,
   },
 
-  scriptParagraph: {
+  scriptParagraph: { //본문
     type: Array,
     require: true,
   },
-});
+
+  scriptSource: { //출처
+    type: String,
+    require: true,
+  },
+}); 
 
 ScriptSchema.plugin(AutoIncrement, { inc_field: "scriptId" });
 

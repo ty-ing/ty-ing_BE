@@ -3,8 +3,10 @@ module.exports.postScript = async (req, res) => {
     try {
        await Script.create({
           scriptTitle : req.body.scriptTitle,
-          scriptTag : req.body.scriptTag.split(","),
-          scriptParagraph : req.body.scriptParagraph.split("\n")
+          scriptCategory : req.body.scriptCategory,
+          scriptTopic : req.body.scriptTopic.split(","),
+          scriptParagraph : req.body.scriptParagraph.split("\n"),
+          scriptSource : req.body.scriptSource
         });
       
         res.status(201).send({

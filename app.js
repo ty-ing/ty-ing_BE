@@ -1,14 +1,16 @@
 require('dotenv').config(); // 환경변수
-
+const passportConfig = require("./passport");
 const express = require("express");
 const app = express();
 const port = 3000;
+
 
 const connect = require("./models");
 connect();
 
 const cors = require('cors');
 app.use(cors());
+passportConfig();
 
 const helmet = require("helmet");
 app.use(helmet());
@@ -45,7 +47,7 @@ app.use("/opendict", [opendictRouter]);
 
 app.get("/admin", (req, res ) => {
   res.render('insert_Scripts.html')
-
+})
 app.listen(port, () => {
   console.log(`listening at http://localhost:${port}`);
-});
+})

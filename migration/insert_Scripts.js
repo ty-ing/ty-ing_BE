@@ -7,7 +7,8 @@ module.exports.postScript = async (req, res) => {
           scriptCategory : req.body.scriptCategory,
           scriptTopic : req.body.scriptTopic.split(","),
           scriptParagraph : req.body.scriptParagraph.split("\n"),
-          scriptSource : req.body.scriptSource
+          scriptTranslate : req.body.scriptTranslate.split("\n"),
+          scriptSource : req.body.scriptSource,
         });
       
         res.status(201).send({

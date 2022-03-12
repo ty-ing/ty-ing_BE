@@ -1,6 +1,4 @@
-const mydict = require("../models/mydict");
 const Mydict = require("../models/mydict");
-const opendict = require("../models/opendict");
 const Opendict = require("../models/opendict");
 
 // 나만의 단어장 등록하기

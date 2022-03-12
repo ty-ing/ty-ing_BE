@@ -29,6 +29,11 @@ const ScriptSchema = new Schema({
     require: true,
   },
 
+  scriptTranslate: { //번역
+    type: Array,
+    require: true,
+  },
+
   scriptSource: { //출처
     type: String,
     require: true,

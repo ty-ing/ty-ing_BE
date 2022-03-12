@@ -26,6 +26,7 @@
                     scriptCategory:$('#scriptCategory').val(),
                     scriptTopic:$('#scriptTopic').val(),
                     scriptParagraph:$('#scriptParagraph').val(),
+                    scriptTranslate:$('#scriptTranslate').val(),
                     scriptSource:$('#scriptSource').val(),
                 },
                 success : function (response) {
@@ -62,6 +63,10 @@
             <div class="form-group">
                 <label>문단(엔터로 구분)</label>
                 <textarea class="form-control" id= "scriptParagraph"></textarea>
+            </div>
+            <div class="form-group">
+                <label>번역(엔터로 구분)</label>
+                <textarea class="form-control" id= "scriptTranslate"></textarea>
             </div>
             <div class="form-group">
                 <label>출처</label>

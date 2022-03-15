@@ -1,17 +1,31 @@
+const { status } = require("express/lib/response");
 const Script = require("../models/script");
 
-module.exports.scriptsListId = async (req, res) => {
+module.exports.findScript = async (req, res) => {
   try {
-    const scriptListId = req.params;
-    const scripts = await Script.find(scriptListId);
-    if (scripts.length <= 0) {
+    const { scriptType, scriptCategory } = req.params;
+
+    const script = await Script.aggregate([
+      { $match: { scriptType: scriptType, scriptCategory: scriptCategory } },
+      { $sample: { size: 1 } },
+    ]);
+
+    if (!scriptCategory) {
+      const script = await Script.aggregate([
+        { $match: { scriptType: scriptType } },
+        { $sample: { size: 1 } },
+      ]);
+      return script;
+    }
+
+    if (script.length <= 0) {
       res.status(200).send({
         ok: false,
         errorMessage: "해당 값이 존재하지 않습니다.",
       });
     } else {
       res.json({
-        scripts,
+        script,
         ok: true,
       });
     }
@@ -24,22 +38,36 @@ module.exports.scriptsListId = async (req, res) => {
   }
 };
 
-module.exports.scriptTag = async (req, res) => {
+module.exports.scriptFilter = async (req, res) => {
+  req.url;
   try {
-    const scriptTag = req.params;
-    const scripts = await Script.find(scriptTag);
-    if (scripts.length <= 0) {
-      res.status(200).send({
-        ok: false,
+    const scriptCategory = req.query.scriptCategory;
+    const scriptTopic = req.query.scriptTopic;
+    const scripts = await Script.aggregate([
+      { $match: { scriptCategory: scriptCategory, scriptTopic: scriptTopic } },
+    ]);
+    res.json({
+      scripts,
+      ok: true,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(200).send({
+      ok: false,
+      errorMessage: "해당 값이 존재하지 않습니다.",
+    });
+  }
+};
 
-        errorMessage: "해당 값이 존재하지 않습니다.",
-      });
-    } else {
-      res.json({
-        scripts,
-        ok: true,
-      });
-    }
+module.exports.searchScripts = async (req, res) => {
+  const targetWord = await req.body.targetWord;
+  const query = new RegExp(targetWord)
+  try {
+    const targetSentence = await Script.find({'scriptParagraph' : query})
+    res.json({
+      targetSentence,
+      ok: true,
+    });
   } catch (err) {
     console.log(err);
     res.status(200).send({

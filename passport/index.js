@@ -30,7 +30,7 @@ module.exports = () => {
               // 가입되지 않는 유저면 회원가입 시키고 로그인을 시킨다
               const newNickname = Date.now();
               const newUser = await Users.create({
-                nickname: newNickname,
+                nickname: newNickname.toString(),
                 id: profile.id,
                 provider: "kakao",
               });

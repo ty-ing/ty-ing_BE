@@ -5,8 +5,8 @@ const AuthMiddleware = require("../middlewares/auth-middleware");
 const { postMydict, getMydict, deleteMydict } = require("../controller/mydict");
 
 // 나만의 단어장
-router.post("/", AuthMiddleware, postMydict); // 등록
+router.post("/:scriptId", AuthMiddleware, postMydict); // 등록
 router.get("/", AuthMiddleware, getMydict); // 불러오기
-router.delete("/", AuthMiddleware, deleteMydict); // 삭제
+router.delete("/:scriptId", AuthMiddleware, deleteMydict); // 삭제
 
 module.exports = router;

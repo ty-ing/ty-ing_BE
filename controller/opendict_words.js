@@ -13,6 +13,15 @@ const postWord = async (req, res) => {
     let dislikeList = [];
     let likeCount = 0;
     let dislikeCount = 0;
+    let count = 0;
+
+    // 단어 뜻을 입력하지 않았을 경우 뜻 추가 불가
+    if (!word || !meaning) {
+      return res.json({
+        ok: false,
+        errorMessage: "단어 뜻을 입력하지 않았습니다.",
+      });
+    }
 
     // 한 유저당 하나의 단어 뜻만 입력 가능 (여러개 입력 원하면 (ex) 맛있는, 맛이 좋은) 예시와 같이 ,로 단어 넣어야 함.)
     if (findUser) {
@@ -60,6 +69,7 @@ const postWord = async (req, res) => {
       dislikeList,
       likeCount,
       dislikeCount,
+      count,
     });
     const findAddedWord = await Words.findOne({ nickname, scriptId, word });
     res.json({
@@ -85,31 +95,31 @@ const getWord = async (req, res) => {
       {
         $project: {
           _id: 0,
-          nickname: 1,
+          word: 1,
           meaning: 1,
+          nickname: 1,
+          likeCount: 1,
+          dislikeCount: 1,
+          count: 1,
+        },
+      },
+      { $sort: { count: -1 } },
+      {
+        $project: {
+          meaning: 1,
+          nickname: 1,
           likeCount: 1,
           dislikeCount: 1,
         },
       },
     ]);
 
-    const sortedOpendict = opendict.sort(function (a, b) {
-      if (a.likeCount - a.dislikeCount < b.likeCount - b.dislikeCount) {
-        return 1;
-      }
-      if (a.likeCount - a.dislikeCount > b.likeCount - b.dislikeCount) {
-        return -1;
-      }
-      // a must be equal to b
-      return 0;
-    });
-
     // 조회
     res.json({
       ok: true,
       message: "단어 뜻 조회 성공",
-      word: word,
-      opendict: sortedOpendict,
+      word,
+      opendict,
     });
   } catch (error) {
     res.json({ ok: false, errorMessage: "단어 뜻 조회 실패" });
@@ -229,8 +239,14 @@ const likeUp = async (req, res) => {
       );
     }
 
+    // count 업데이트
+    const sendlikeCount = await Words.findOne({ scriptId, wordId }); // 업데이트 된 카운트 찾기
+    await Words.updateOne(
+      { scriptId, wordId },
+      { $set: { count: sendlikeCount.likeCount - sendlikeCount.dislikeCount } }
+    );
+
     // 클라이언트 쪽에 좋아요 수 보내기
-    const sendlikeCount = await Words.findOne({ scriptId, wordId });
     console.log(sendlikeCount);
     res.json({
       ok: true,
@@ -351,7 +367,16 @@ const dislikeUp = async (req, res) => {
       );
     }
 
-    const sendDislikeCount = await Words.findOne({ scriptId, wordId });
+    // count 업데이트
+    const sendDislikeCount = await Words.findOne({ scriptId, wordId }); // 업데이트 된 카운트 찾기
+    await Words.updateOne(
+      { scriptId, wordId },
+      {
+        $set: {
+          count: sendDislikeCount.likeCount - sendDislikeCount.dislikeCount,
+        },
+      }
+    );
 
     res.json({
       ok: true,

@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 
 const mydictSchema = new mongoose.Schema({
   nickname: String,
-  word: Array
+  mydict : Object,
 });
 
 module.exports = mongoose.model("Mydicts", mydictSchema);

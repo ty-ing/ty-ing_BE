@@ -55,6 +55,21 @@ const nicknameCheck = async (req, res) => {
   }
 };
 
+const updateUserInfo = async (req, res) => {
+  try {
+    const { id } = res.locals.user;
+    const { nickname } = await nicknameCheckSchema.validateAsync(req.body); // Joi 유효성 검사
+    
+    await Users.updateOne({ id },{ $set: { nickname }})
+    res.status(201).json({ ok: true, message: "수정 완료" });
+  } catch (error) {
+    res.status(400).json({
+      ok: false,
+      message: "수정 실패" 
+    });
+  }
+}
+
 // 회원가입 validate할 스키마
 const signupSchema = Joi.object({
   id: Joi.string().required(),
@@ -180,6 +195,7 @@ module.exports = {
   nicknameCheck, // 회원가입에서 닉네임 중복검사
   signup, // 회원가입
   login, // 로그인
-  auth,
-  kakaoCallback // 로그인 정보 불러오기 (auth-middleware에 저장된 거)
+  auth, // 로그인 정보 불러오기 (auth-middleware에 저장된 거)
+  updateUserInfo, // 유저 정보 수정
+  kakaoCallback // 카카오 로그인
 };

@@ -87,8 +87,8 @@ const postWord = async (req, res) => {
   }
 };
 
-// 단어 뜻 조회
-const getWord = async (req, res) => {
+// 단어 뜻 조회 게스트용
+const getWordForGuest = async (req, res) => {
   try {
     let { scriptId, word } = req.params;
     word = word.toLowerCase();
@@ -110,6 +110,7 @@ const getWord = async (req, res) => {
           likeCount: 1,
           dislikeCount: 1,
           count: 1,
+          wordId: 1,
         },
       },
       { $sort: { count: -1 } },
@@ -119,9 +120,94 @@ const getWord = async (req, res) => {
           nickname: 1,
           likeCount: 1,
           dislikeCount: 1,
+          wordId: 1,
+        },
+      },
+      {
+        $addFields: {
+          isLike: false,
+          isDislike: false,
         },
       },
     ]);
+
+    // 조회
+    res.json({
+      ok: true,
+      message: "단어 뜻 조회 성공",
+      word,
+      opendict: findMeanings,
+    });
+  } catch (error) {
+    res.json({ ok: false, errorMessage: "단어 뜻 조회 실패" });
+    console.error(`${error} 에러로 인해 단어 뜻 조회 실패`);
+  }
+};
+
+// 단어 뜻 조회 로그인한 사용자용
+const getWordForUser = async (req, res) => {
+  try {
+    const nickname = res.locals.user.nickname;
+    let { scriptId, word } = req.params;
+    word = word.toLowerCase();
+
+    // 등록한 단어만 조회 가능
+    const findMeaning = await Words.findOne({ scriptId, word });
+    if (!findMeaning) {
+      return res.json({ ok: false, errorMessage: "등록된 단어가 아닙니다." });
+    }
+
+    // 전체 단어 but 조건 일치 하는 부분만 조회
+    let findMeanings = await Words.aggregate([
+      { $match: { scriptId, word } },
+      {
+        $project: {
+          _id: 0,
+          word: 1,
+          meaning: 1,
+          nickname: 1,
+          likeList: 1,
+          dislikeList: 1,
+          likeCount: 1,
+          dislikeCount: 1,
+          count: 1,
+          wordId: 1,
+        },
+      },
+      { $sort: { count: -1 } },
+      {
+        $project: {
+          meaning: 1,
+          nickname: 1,
+          likeCount: 1,
+          dislikeCount: 1,
+          wordId: 1,
+        },
+      },
+    ]);
+
+    // 전체 단어 모든 조건 조회
+    const findAllMeanings = await Words.aggregate([
+      { $match: { scriptId, word } },
+      { $sort: { count: -1 } },
+    ]);
+
+    // 유저가 like를 했는지 찾아서 모으기
+    const findIsLike = findAllMeanings.map((meaning, idx) => {
+      return meaning.likeList.includes(nickname);
+    });
+
+    // 유저가 dislike를 했는지 찾아서 모으기
+    const findIsDislike = findAllMeanings.map((meaning, idx) => {
+      return meaning.dislikeList.includes(nickname);
+    });
+
+    // isLike, disLike 추가
+    findMeanings.map((meaning, idx) => {
+      meaning.isLike = findIsLike[idx];
+      meaning.disLike = findIsDislike[idx];
+      return meaning;
+    });
 
     // 조회
     res.json({
@@ -492,7 +578,8 @@ const getDislike = async (req, res) => {
 module.exports = {
   //오픈사전 단어장
   postWord, // 단어 뜻 추가, 수정
-  getWord, // 단어 뜻 조회
+  getWordForGuest, // 단어 뜻 조회 게스트용
+  getWordForUser, // 단어 뜻 조회 로그인한 사용자용
   putWord, // 단어 뜻 수정
   deleteWord, // 단어 뜻 삭제
 

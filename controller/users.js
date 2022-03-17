@@ -137,7 +137,7 @@ const login = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ id: user.id, nickname: user.nickname }, process.env.TOKENKEY, { expiresIn: '60m'}); // 사용자를 구분하기 위해서 id를 JWT에 저장해주고 토큰 생성
+    const token = jwt.sign({ id: user.id, nickname: user.nickname }, process.env.TOKENKEY, { expiresIn: '24h'}); // 사용자를 구분하기 위해서 id를 JWT에 저장해주고 토큰 생성
     console.log(user.id);
     res.json({
       ok: true,
@@ -180,7 +180,7 @@ const kakaoCallback = (req, res, next) => {
     (err, user, info) => {
       if (err) return next(err);
       const { id, nickname } = user;
-      const token = jwt.sign({ id, nickname }, process.env.TOKENKEY,{ expiresIn: '60m'});
+      const token = jwt.sign({ id, nickname }, process.env.TOKENKEY,{ expiresIn: '24h'});
       result = {
         token,
         id: user.id,
@@ -210,6 +210,16 @@ const studyrecord = async (req, res) => {
   }
 };
 
+  // const mypage = async (req, res) => {
+  //   try {
+  //     const id = res.locals.user.id;
+  //     const nickname = res.locals.user.nickname;
+
+  //   } catch (error) {
+
+  //   }
+  // }
+
 module.exports = {
   idCheck, // 회원가입에서 아이디 중복검사
   nicknameCheck, // 회원가입에서 닉네임 중복검사
@@ -218,5 +228,6 @@ module.exports = {
   auth, // 로그인 정보 불러오기 (auth-middleware에 저장된 거)
   updateUserInfo, // 유저 정보 수정
   kakaoCallback, // 카카오 로그인
-  studyrecord 
+  studyrecord,
+  // mypage 
 };

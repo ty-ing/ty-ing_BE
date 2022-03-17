@@ -1,4 +1,5 @@
 const Users = require("../models/users"); // 유저 스키마
+const Studyrecord = require("../models/studyrecord");
 const jwt = require("jsonwebtoken"); // jwt 토큰 사용
 const Joi = require("joi"); // 유효성 검증 라이브러리
 const bcrypt = require("bcrypt");
@@ -136,7 +137,7 @@ const login = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ id: user.id }, process.env.TOKENKEY, { expiresIn: '60m'}); // 사용자를 구분하기 위해서 id를 JWT에 저장해주고 토큰 생성
+    const token = jwt.sign({ id: user.id, nickname: user.nickname }, process.env.TOKENKEY, { expiresIn: '60m'}); // 사용자를 구분하기 위해서 id를 JWT에 저장해주고 토큰 생성
     console.log(user.id);
     res.json({
       ok: true,
@@ -178,8 +179,8 @@ const kakaoCallback = (req, res, next) => {
     { failureRedirect: "/" },
     (err, user, info) => {
       if (err) return next(err);
-      const { id, } = user;
-      const token = jwt.sign({ id, }, process.env.TOKENKEY,{ expiresIn: '60m'});
+      const { id, nickname } = user;
+      const token = jwt.sign({ id, nickname }, process.env.TOKENKEY,{ expiresIn: '60m'});
       result = {
         token,
         id: user.id,
@@ -190,6 +191,25 @@ const kakaoCallback = (req, res, next) => {
   )(req, res, next);
 };
 
+const studyrecord = async (req, res) => {
+  try{
+    const id = res.locals.user.id;
+    const { scriptId, scriptTitle, time, typingCnt } = req.body;
+    const date = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
+  
+    await Studyrecord.create({ id, scriptId, scriptTitle, time, date:date, typingCnt});
+    res.json({
+      ok: true,
+      message: "등록 완료"
+    });
+    } catch (error){
+    res.json({
+      ok: false,
+      message: "등록 실패"
+    });
+  }
+};
+
 module.exports = {
   idCheck, // 회원가입에서 아이디 중복검사
   nicknameCheck, // 회원가입에서 닉네임 중복검사
@@ -197,5 +217,6 @@ module.exports = {
   login, // 로그인
   auth, // 로그인 정보 불러오기 (auth-middleware에 저장된 거)
   updateUserInfo, // 유저 정보 수정
-  kakaoCallback // 카카오 로그인
+  kakaoCallback, // 카카오 로그인
+  studyrecord 
 };

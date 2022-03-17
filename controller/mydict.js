@@ -5,8 +5,9 @@ const Opendict = require("../models/opendict");
 const postMydict = async (req, res) => {
   try {
     const nickname = res.locals.user.nickname;
-    const { scriptId } = req.params;
-    const { word, sentence } = req.body;
+    let { scriptId, word } = req.params;
+    const { sentence } = req.body;
+    word = word.toLowerCase();
 
     // 단어를 입력하지 않았을 경우, 문장을 추가하지 않았을 때 단어 등록 불가
     if (!word || !sentence) {
@@ -31,14 +32,14 @@ const postMydict = async (req, res) => {
     }
 
     // 나만의 단어장에 이미 등록된 단어인지 찾기
-    const find = await Mydict.findOne({
+    const findMydict = await Mydict.findOne({
       nickname,
-      "mydict.scriptId": scriptId,
-      "mydict.word": word,
+      scriptId,
+      word,
     });
 
     // 나만의 단어장에 이미 등록한 단어일 때 등록 불가
-    if (find) {
+    if (findMydict) {
       return res.json({
         ok: false,
         errorMessage: "나만의 단어장에 이미 등록한 단어입니다.",
@@ -47,8 +48,10 @@ const postMydict = async (req, res) => {
 
     // 나만의 단어장 등록
     await Mydict.create({
-      nickname: nickname,
-      mydict: { scriptId: scriptId, word: word, sentence: sentence },
+      nickname,
+      scriptId,
+      word,
+      sentence,
     });
 
     res.json({ ok: true, message: "나만의 단어장 단어 등록 성공" });
@@ -64,31 +67,26 @@ const getMydict = async (req, res) => {
     const nickname = res.locals.user.nickname;
 
     // 나만의 단어장에서 등록한 단어 찾기
-    const find = await Mydict.aggregate([
+    const findMydict = await Mydict.aggregate([
       { $match: { nickname } },
-      { $project: { _id: 0, nickname: 1, mydict: 1 } },
+      { $project: { _id: 0, nickname: 1, scriptId: 1, word: 1, sentence: 1 } },
     ]);
 
     // 나만의 단어장에 등록한 단어가 없을 때
-    if (!find.length) {
+    if (!findMydict.length) {
       return res.json({ ok: false, errorMessage: "등록한 단어가 없습니다." });
     }
 
-    // 나만의 단어장에서 찾은 단어 리스트로 만들기
-    let scriptId = [];
-    let word = [];
-    let sentence = []; // 문장 리스트
-    for (let i of find) {
-      scriptId.push(i.mydict.scriptId);
-      word.push(i.mydict.word);
-      sentence.push(i.mydict.sentence);
-    }
-
-    // 리스트를 통해서 오픈사전 단어장에서 전체 단어 찾아오기
+    // 리스트를 통해서 오픈사전 단어장에서 좋아요 1위 단어 뜻 가져오기
     let findOpendict = [];
-    for (let i = 0; i < word.length; i++) {
+    for (let mydict of findMydict) {
       const opendict = await Opendict.aggregate([
-        { $match: { scriptId: scriptId[i], word: word[i] } },
+        {
+          $match: {
+            scriptId: mydict.scriptId,
+            word: mydict.word,
+          },
+        },
         {
           $project: {
             _id: 0,
@@ -117,10 +115,10 @@ const getMydict = async (req, res) => {
     }
 
     // 리스트를 통해서 오픈사전 단어장에서 내가 등록한 단어 찾아오기
-    let nicknameOpendict = [];
-    for (let i = 0; i < word.length; i++) {
-      const opendict = await Opendict.aggregate([
-        { $match: { scriptId: scriptId[i], word: word[i], nickname } },
+    let idx = 0;
+    for (let mydict of findMydict) {
+      let opendict = await Opendict.aggregate([
+        { $match: { scriptId: mydict.scriptId, word: mydict.word, nickname } },
         {
           $project: {
             _id: 0,
@@ -143,17 +141,27 @@ const getMydict = async (req, res) => {
         },
       ]);
 
-      nicknameOpendict.push(opendict);
+      // 내가 등록한 단어가 없을 때 빈 칸으로 넣어줌
+      if (opendict.length === 0) {
+        opendict = [{ meaning: "" }];
+      }
+
+      // // 좋아요 1위 단어 뜻 옆에 넣기
+      findOpendict[idx].push(...opendict, mydict.sentence, mydict.scriptId);
+
+      // 객체 분리해서 넣어주기
+      if (findOpendict[idx][0] || findOpendict[idx][1]) {
+        findOpendict[idx][0] = findOpendict[idx][0].meaning;
+        findOpendict[idx][1] = findOpendict[idx][1].meaning;
+      }
+
+      idx++;
     }
 
     res.json({
       ok: true,
       message: "나만의 단어장 단어 조회 성공",
-      scriptId: scriptId,
-      word: word,
-      sentence: sentence,
-      most_liked_meaning: findOpendict,
-      meaning_added_by_me: nicknameOpendict,
+      mydict: findOpendict.reverse(),
     });
   } catch (error) {
     res.json({ ok: false, errorMessage: "나만의 단어장 단어 조회 실패" });
@@ -165,17 +173,16 @@ const getMydict = async (req, res) => {
 const deleteMydict = async (req, res) => {
   try {
     const nickname = res.locals.user.nickname;
-    const { scriptId } = req.params;
-    const { word } = req.body;
-
-    const find = await Mydict.findOne({
+    const { scriptId, word } = req.params;
+    
+    const findMydict = await Mydict.findOne({
       nickname,
-      "mydict.scriptId": scriptId,
-      "mydict.word": word,
+      scriptId,
+      word,
     });
 
-    // 등록하지 않은 단어이거나, 이미 삭제 했을 때
-    if (!find) {
+    // 나만의 단어장에 등록하지 않은 단어이거나, 이미 삭제 했을 때
+    if (!findMydict) {
       return res.json({
         ok: false,
         errorMessage: "단어를 등록하지 않으셨거나 이미 단어를 삭제하셨습니다.",
@@ -186,8 +193,8 @@ const deleteMydict = async (req, res) => {
     await Mydict.deleteOne({
       nickname,
       word,
-      "mydict.scriptId": scriptId,
-      "mydict.word": word,
+      scriptId,
+      word,
     });
 
     res.json({ ok: true, message: "나만의 단어장 단어 삭제 성공" });

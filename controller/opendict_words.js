@@ -3,12 +3,11 @@ const Words = require("../models/opendict"); // 단어 스키마
 // 단어 뜻 추가
 const postWord = async (req, res) => {
   try {
-    const { scriptId } = req.params;
-    let { word, meaning } = req.body;
-    const user = res.locals.user;
-    const nickname = user.nickname;
-    const findUser = await Words.findOne({ nickname, scriptId, word });
+    const nickname = res.locals.user.nickname;
+    let { scriptId, word } = req.params;
+    let { meaning } = req.body;
     word = word.toLowerCase();
+
     let likeList = [];
     let dislikeList = [];
     let likeCount = 0;
@@ -23,8 +22,11 @@ const postWord = async (req, res) => {
       });
     }
 
+    // 유저가 등록한 단어 이미 있는지 찾기
+    const findUserMeaning = await Words.findOne({ nickname, scriptId, word });
+
     // 한 유저당 하나의 단어 뜻만 입력 가능 (여러개 입력 원하면 (ex) 맛있는, 맛이 좋은) 예시와 같이 ,로 단어 넣어야 함.)
-    if (findUser) {
+    if (findUserMeaning) {
       return res.json({
         ok: false,
         errorMessage: "이미 단어 뜻을 등록하셨습니다.",
@@ -32,16 +34,15 @@ const postWord = async (req, res) => {
     }
 
     // 이미 있는 단어 뜻일 경우 입력 불가
-    const meaningFromFind = await Words.aggregate([
+    // 단어 뜻 전체 검색
+    const findMeanings = await Words.aggregate([
       { $match: { scriptId, word } },
-      { $project: { meaning: 1 } },
+      { $project: { _id: 0, meaning: 1 } },
     ]);
 
-    console.log(meaningFromFind);
-
-    let meaningList = [];
-    for (let i of meaningFromFind) {
-      meaningList.push(i.meaning);
+    let meaningList = []; // JSON 해체 후 meaning만 뽑아내서 리스트 만들기
+    for (let findMeaning of findMeanings) {
+      meaningList.push(findMeaning.meaning);
     }
 
     if (meaningList.includes(meaning)) {
@@ -71,7 +72,10 @@ const postWord = async (req, res) => {
       dislikeCount,
       count,
     });
+
+    // 추가된 단어 뜻 wordId 같이 보내주기
     const findAddedWord = await Words.findOne({ nickname, scriptId, word });
+
     res.json({
       ok: true,
       message: "단어 뜻 추가 성공",
@@ -86,11 +90,16 @@ const postWord = async (req, res) => {
 // 단어 뜻 조회
 const getWord = async (req, res) => {
   try {
-    const { scriptId } = req.params;
-    let { word } = req.body;
+    let { scriptId, word } = req.params;
     word = word.toLowerCase();
 
-    const opendict = await Words.aggregate([
+    // 등록한 단어만 조회 가능
+    const findMeaning = await Words.findOne({ scriptId, word });
+    if (!findMeaning) {
+      return res.json({ ok: false, errorMessage: "등록된 단어가 아닙니다." });
+    }
+
+    const findMeanings = await Words.aggregate([
       { $match: { scriptId, word } },
       {
         $project: {
@@ -119,7 +128,7 @@ const getWord = async (req, res) => {
       ok: true,
       message: "단어 뜻 조회 성공",
       word,
-      opendict,
+      opendict: findMeanings,
     });
   } catch (error) {
     res.json({ ok: false, errorMessage: "단어 뜻 조회 실패" });
@@ -132,26 +141,25 @@ const putWord = async (req, res) => {
   try {
     const user = res.locals.user;
     const nickname = user.nickname; // 로그인한 사용자의 닉네임
-    const { scriptId, wordId } = req.params;
-    let { word, meaning } = req.body;
+    let { scriptId, word, wordId } = req.params;
+    let { meaning } = req.body;
     word = word.toLowerCase();
 
-    const find = await Words.find({ scriptId, word }); // 단어가 일치하는 필드 여러개 찾기
-    const findOne = await Words.findOne({ scriptId, wordId }); // 현재 단어 필드 하나 찾기
-    const findNickname = findOne.nickname; // 디비에 있는 단어와 함께 저장된 닉네임
+    const findMeanings = await Words.find({ scriptId, word }); // 단어가 일치하는 필드 여러개 찾기
+    const findMeaning = await Words.findOne({ scriptId, wordId }); // 입력 받은 단어 뜻 필드 하나 찾기
 
     // 로그인한 사용자와 단어 뜻을 등록한 사용자가 다를 때 수정 불가 (본인이 등록한 단어 뜻만 수정 가능)
-    if (nickname !== findNickname) {
+    if (nickname !== findMeaning.nickname) {
       return res.json({
         ok: false,
         errorMessage: "다른 사용자의 단어 뜻은 수정할 수 없습니다.",
       });
     }
 
-    // 이미 있는 단어 뜻일 경우 수정 불가
-    let meaningList = [];
-    for (let i of find) {
-      meaningList.push(i.meaning);
+    // 전체 단어 검색해서 현재 수정하려고 하는 뜻과 비교 후 이미 있는 단어 뜻일 경우 수정 불가
+    let meaningList = []; // JSON 해체 후 meaning만 뽑아내서 리스트 만들기
+    for (let findMeaning of findMeanings) {
+      meaningList.push(findMeaning.meaning);
     }
 
     if (meaningList.includes(meaning)) {
@@ -174,11 +182,10 @@ const deleteWord = async (req, res) => {
     const nickname = res.locals.user.nickname;
     const { scriptId, wordId } = req.params;
 
-    const find = await Words.findOne({ scriptId, wordId });
-    const findNickname = find.nickname;
+    const findMeaning = await Words.findOne({ scriptId, wordId }); // 입력 받은 단어 뜻 필드 찾기
 
     // 본인이 등록한 단어 뜻만 삭제 가능
-    if (nickname !== findNickname) {
+    if (nickname !== findMeaning.nickname) {
       return res.json({
         ok: false,
         errorMessage: "다른 사용자의 단어 뜻은 삭제할 수 없습니다.",
@@ -199,12 +206,12 @@ const likeUp = async (req, res) => {
     const nickname = res.locals.user.nickname;
     const { scriptId, wordId } = req.params;
 
-    const find = await Words.findOne({ scriptId, wordId });
-    let likeList = find.likeList;
-    let dislikeList = find.dislikeList;
+    const findMeaning = await Words.findOne({ scriptId, wordId }); // 입력 받은 단어 뜻 필드 찾기
+    let likeList = findMeaning.likeList;
+    let dislikeList = findMeaning.dislikeList;
 
     // 본인의 단어에는 좋아요를 누를 수 없음
-    if (nickname === find.nickname) {
+    if (nickname === findMeaning.nickname) {
       return res.json({
         ok: false,
         errorMessage: "본인이 등록한 단어 뜻에는 좋아요를 누를 수 없습니다.",
@@ -239,19 +246,22 @@ const likeUp = async (req, res) => {
       );
     }
 
-    // count 업데이트
-    const sendlikeCount = await Words.findOne({ scriptId, wordId }); // 업데이트 된 카운트 찾기
+    // 좋아요 - 싫어요 count 업데이트
+    const findCount = await Words.findOne({ scriptId, wordId }); // 업데이트 된 카운트 찾기
     await Words.updateOne(
       { scriptId, wordId },
-      { $set: { count: sendlikeCount.likeCount - sendlikeCount.dislikeCount } }
+      { $set: { count: findCount.likeCount - findCount.dislikeCount } }
     );
 
-    // 클라이언트 쪽에 좋아요 수 보내기
-    console.log(sendlikeCount);
+    const isLike = findCount.likeList.includes(nickname);
+    const isDislike = findCount.dislikeList.includes(nickname);
+
     res.json({
       ok: true,
       message: "좋아요 누르기 성공",
-      likeCount: sendlikeCount.likeCount,
+      likeCount: findCount.likeCount,
+      isLike,
+      isDislike,
     });
   } catch (error) {
     res.json({ ok: false, errorMessage: "좋아요 누르기 실패" });
@@ -264,13 +274,12 @@ const likeDown = async (req, res) => {
   try {
     const nickname = res.locals.user.nickname; // 로그인한 닉네임
     const { scriptId, wordId } = req.params;
-    console.log(nickname);
 
-    const find = await Words.findOne({ scriptId, wordId });
-    const likeList = find.likeList;
+    const findMeaning = await Words.findOne({ scriptId, wordId }); // 입력 받은 단어 뜻 필드 찾기
+    const likeList = findMeaning.likeList;
 
     // 본인의 단어에는 좋아요를 누르거나 취소할 수 없음
-    if (nickname === find.nickname) {
+    if (nickname === findMeaning.nickname) {
       return res.json({
         ok: false,
         errorMessage:
@@ -292,13 +301,18 @@ const likeDown = async (req, res) => {
       { $pull: { likeList: nickname }, $inc: { likeCount: -1 } }
     );
 
-    // 클라이언트 쪽에 좋아요 수 보내기
-    const sendlikeCount = await Words.findOne({ scriptId, wordId });
+    // 좋아요 - 싫어요 count 업데이트
+    const findCount = await Words.findOne({ scriptId, wordId });
+
+    const isLike = findCount.likeList.includes(nickname);
+    const isDislike = findCount.dislikeList.includes(nickname);
 
     res.json({
       ok: true,
       message: "좋아요 취소 성공",
-      likeCount: sendlikeCount.likeCount,
+      likeCount: findCount.likeCount,
+      isLike,
+      isDislike,
     });
   } catch (error) {
     res.json({ ok: false, errorMessage: "좋아요 취소 실패" });
@@ -309,12 +323,20 @@ const likeDown = async (req, res) => {
 // 좋아요 조회
 const getLike = async (req, res) => {
   try {
+    const nickname = res.locals.user.nickname;
     const { scriptId, wordId } = req.params;
 
-    const find = await Words.findOne({ scriptId, wordId });
-    const likeCount = find.likeCount;
+    const findMeaning = await Words.findOne({ scriptId, wordId }); // 입력 받은 단어 뜻 필드 찾기
+    const isLike = findMeaning.likeList.includes(nickname);
+    const isDislike = findMeaning.dislikeList.includes(nickname);
 
-    res.json({ ok: true, message: "좋아요 조회 성공", likeCount: likeCount });
+    res.json({
+      ok: true,
+      message: "좋아요 조회 성공",
+      likeCount: findMeaning.likeCount,
+      isLike,
+      isDislike,
+    });
   } catch (error) {
     res.json({ ok: false, errorMessage: "좋아요 조회 실패" });
     console.error(`${error} 에러로 좋아요 조회 실패`);
@@ -327,12 +349,12 @@ const dislikeUp = async (req, res) => {
     const nickname = res.locals.user.nickname;
     const { scriptId, wordId } = req.params;
 
-    const find = await Words.findOne({ scriptId, wordId });
-    const likeList = find.likeList;
-    const dislikeList = find.dislikeList;
+    const findMeaning = await Words.findOne({ scriptId, wordId }); // 입력 받은 단어 뜻 필드 찾기
+    const likeList = findMeaning.likeList;
+    const dislikeList = findMeaning.dislikeList;
 
     // 본인의 단어에는 싫어요를 누를 수 없음
-    if (find.nickname === nickname) {
+    if (nickname === findMeaning.nickname) {
       return res.json({
         ok: false,
         errorMessage: "본인이 등록한 단어 뜻에는 싫어요를 누를 수 없습니다.",
@@ -367,21 +389,26 @@ const dislikeUp = async (req, res) => {
       );
     }
 
-    // count 업데이트
-    const sendDislikeCount = await Words.findOne({ scriptId, wordId }); // 업데이트 된 카운트 찾기
+    // 좋아요 - 싫어요 count 업데이트
+    const findCount = await Words.findOne({ scriptId, wordId }); // 업데이트 된 카운트 찾기
     await Words.updateOne(
       { scriptId, wordId },
       {
         $set: {
-          count: sendDislikeCount.likeCount - sendDislikeCount.dislikeCount,
+          count: findCount.likeCount - findCount.dislikeCount,
         },
       }
     );
 
+    const isLike = findCount.likeList.includes(nickname);
+    const isDislike = findCount.dislikeList.includes(nickname);
+
     res.json({
       ok: true,
       message: "싫어요 누르기 성공",
-      dislikeCount: sendDislikeCount.dislikeCount,
+      dislikeCount: findCount.dislikeCount,
+      isLike,
+      isDislike,
     });
   } catch (error) {
     res.json({ ok: false, errorMessage: "싫어요 누르기 실패" });
@@ -397,12 +424,10 @@ const dislikeDown = async (req, res) => {
     console.log(scriptId);
     console.log(wordId);
 
-    const find = await Words.findOne({ scriptId, wordId });
-    const dislikeList = find.dislikeList;
-    console.log(dislikeList);
-    console.log(nickname);
+    const findMeaning = await Words.findOne({ scriptId, wordId }); // 입력 받은 단어 뜻 필드 찾기
+    const dislikeList = findMeaning.dislikeList;
 
-    if (nickname === find.nickname) {
+    if (nickname === findMeaning.nickname) {
       return res.json({
         ok: false,
         errorMessage:
@@ -423,11 +448,17 @@ const dislikeDown = async (req, res) => {
       { $pull: { dislikeList: nickname }, $inc: { dislikeCount: -1 } }
     );
 
-    const sendDislikeCount = await Words.findOne({ scriptId, wordId });
+    const findCount = await Words.findOne({ scriptId, wordId });
+
+    const isLike = findCount.likeList.includes(nickname);
+    const isDislike = findCount.dislikeList.includes(nickname);
+
     res.json({
       ok: true,
       message: "싫어요 취소 성공",
-      dislikeList: sendDislikeCount.dislikeCount,
+      dislikeList: findCount.dislikeCount,
+      isLike,
+      isDislike,
     });
   } catch (error) {
     res.json({ ok: false, errorMessage: "싫어요 취소 실패" });
@@ -438,15 +469,19 @@ const dislikeDown = async (req, res) => {
 // 싫어요 조회
 const getDislike = async (req, res) => {
   try {
+    const nickname = res.locals.user.nickname;
     const { scriptId, wordId } = req.params;
 
-    const find = await Words.findOne({ scriptId, wordId });
-    const dislikeCount = find.dislikeCount;
+    const findMeaning = await Words.findOne({ scriptId, wordId }); // 입력 받은 단어 뜻 필드 찾기
+    const isLike = findMeaning.likeList.includes(nickname);
+    const isDislike = findMeaning.dislikeList.includes(nickname);
 
     res.json({
       ok: true,
       message: "싫어요 조회 성공",
-      dislikeCount: dislikeCount,
+      dislikeCount: findMeaning.dislikeCount,
+      isLike,
+      isDislike,
     });
   } catch (error) {
     res.json({ ok: false, errorMessage: "싫어요 조회 실패" });

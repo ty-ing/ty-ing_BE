@@ -24,8 +24,18 @@ module.exports = (req, res, next) => {
       next();
     });
   } catch (err) {
+    if(err.name === "TokenExpiredError"){
+      res.send({
+        ok: false,
+        message: '토큰 유효기간이 끝났습니다. 다시 로그인 해주세요'
+      });
+      return;
+    } else {
     res.status(401).send({
-      errorMessage: '로그인 후 이용 가능한 기능입니다.',
+      ok: false,
+      errorMessage: '비정상적인 토큰입니다. 다시 로그인 해주세요',
     });
+    return;
   }
+}
 };

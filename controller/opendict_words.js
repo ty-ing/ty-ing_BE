@@ -205,7 +205,7 @@ const getWordForUser = async (req, res) => {
     // isLike, disLike 추가
     findMeanings.map((meaning, idx) => {
       meaning.isLike = findIsLike[idx];
-      meaning.disLike = findIsDislike[idx];
+      meaning.isDisLike = findIsDislike[idx];
       return meaning;
     });
 

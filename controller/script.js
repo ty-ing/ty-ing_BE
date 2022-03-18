@@ -3,13 +3,14 @@ const Script = require("../models/script");
 module.exports.findScript = async (req, res) => {
   const { scriptType, scriptCategory } = req.params;
   try {
-    if (scriptType && scriptCategory === "all") {
+    if (scriptType === "all" && scriptCategory === "all") {
       const script = await Script.aggregate([{ $sample: { size: 1 } }]);
       res.json({
         script,
         ok: true,
       });
-    } else if (scriptCategory === "all") {
+    } else if (scriptCategory === "all" && scriptType !=="all")  {
+      console.log(11)
       const script = await Script.aggregate([
         { $match: { scriptType: scriptType } },
         { $sample: { size: 1 } },
@@ -48,7 +49,7 @@ module.exports.scriptFilter = async (req, res) => {
         scripts,
         ok: true,
       });
-    } else if (scriptCategory === "all") {
+    } else if (scriptCategory === "all" && scriptTopic !=="all") {
       const scripts = await Script.aggregate([
         { $match: { scriptTopic: scriptTopic } },
       ]);

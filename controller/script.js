@@ -90,7 +90,7 @@ module.exports.scriptFilter = async (req, res) => {
 
 module.exports.searchScripts = async (req, res) => {
   const targetWord = await req.params;
-  const query = new RegExp(targetWord);
+  const query = new RegExp(targetWord, "gi");  
   try {
     const targetScripts = await Script.find({ scriptParagraph: query });
     

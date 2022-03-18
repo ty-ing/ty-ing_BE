@@ -1,35 +1,36 @@
-const { status } = require("express/lib/response");
 const Script = require("../models/script");
 
 module.exports.findScript = async (req, res) => {
+  const { scriptType, scriptCategory } = req.params;
   try {
-    const { scriptType, scriptCategory } = req.params;
-
-    const script = await Script.aggregate([
-      { $match: { scriptType: scriptType, scriptCategory: scriptCategory } },
-      { $sample: { size: 1 } },
-    ]);
-
-    if (!scriptCategory) {
+    if (scriptType && scriptCategory === 1) {
+      const script = await Script.aggregate([
+        { $sample: { size: 1}},
+      ]);
+      res.json({
+      script,
+      ok: true,
+    })
+  } else if (scriptCategory ===1 ) {
       const script = await Script.aggregate([
         { $match: { scriptType: scriptType } },
         { $sample: { size: 1 } },
       ]);
-      return script;
-    }
-
-    if (script.length <= 0) {
-      res.status(200).send({
-        ok: false,
-        errorMessage: "해당 값이 존재하지 않습니다.",
-      });
-    } else {
+      res.json({
+        script,
+        ok: true,
+    })  
+  } else {
+   const script = await Script.aggregate([
+    { $match: { scriptType: scriptType , scriptCategory: scriptCategory } },
+    { $sample: { size: 1 } },
+   ]);
       res.json({
         script,
         ok: true,
       });
     }
-  } catch (err) {
+    } catch (err) {
     console.log(err);
     res.status(200).send({
       ok: false,
@@ -61,9 +62,14 @@ module.exports.scriptFilter = async (req, res) => {
 
 module.exports.searchScripts = async (req, res) => {
   const targetWord = await req.body.targetWord;
-  const query = new RegExp(targetWord)
+  const query = new RegExp(targetWord);
   try {
-    const targetSentence = await Script.find({'scriptParagraph' : query})
+    const targetSentence = await Script.find({ scriptParagraph: query });
+
+    if (!targetSentence.length) {
+      throw "There is no proper data..";
+    }
+
     res.json({
       targetSentence,
       ok: true,

@@ -57,7 +57,7 @@ module.exports.scriptFilter = async (req, res) => {
         scripts,
         ok: true,
       });
-    } else if (scriptTopic === "all") {
+    } else if (scriptTopic === "all" && scriptCategory !== "all") {
       const scripts = await Script.aggregate([
         { $match: { scriptCategory: scriptCategory } },
       ]);

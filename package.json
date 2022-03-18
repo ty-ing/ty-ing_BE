@@ -23,6 +23,9 @@
     "passport-kakao": "^1.0.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.15"
+    "cheerio": "^1.0.0-rc.10",
+    "geckodriver": "^3.0.1",
+    "nodemon": "^2.0.15",
+    "selenium-webdriver": "^4.1.1"
   }
 }

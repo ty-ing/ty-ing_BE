@@ -1,3 +1,4 @@
+const script = require("../models/script");
 const Script = require("../models/script");
 
 module.exports.findScript = async (req, res) => {
@@ -50,17 +51,19 @@ module.exports.scriptFilter = async (req, res) => {
         ok: true,
       });
     } else if (scriptCategory === "all" && scriptTopic !=="all") {
-      const scripts = await Script.aggregate([
-        { $match: { scriptTopic: scriptTopic } },
-      ]);
+      const scriptTopicList = scriptTopic.split("|")
+      const scripts = await Script.find(
+        { scriptTopic: { $in: scriptTopicList } },
+      );
       res.json({
         scripts,
         ok: true,
       });
     } else if (scriptTopic === "all" && scriptCategory !== "all") {
-      const scripts = await Script.aggregate([
-        { $match: { scriptCategory: scriptCategory } },
-      ]);
+    const scriptCategoryList = scriptCategory.split("|")
+      const scripts = await Script.find(
+         { scriptCategory: { $in:  scriptCategoryList } } 
+      );
       res.json({
         scripts,
         ok: true,
@@ -88,7 +91,6 @@ module.exports.scriptFilter = async (req, res) => {
 module.exports.searchScripts = async (req, res) => {
   const targetWord = await req.body.targetWord;
   const query = new RegExp(targetWord);
-  console.log(query)
   try {
     const targetSentence = await Script.find({ scriptParagraph: query });
     console.log(targetSentence)
@@ -98,7 +100,7 @@ module.exports.searchScripts = async (req, res) => {
     }
 
     res.json({
-      targetSentence,
+      targetScripts,
       ok: true,
     });
   } catch (err) {

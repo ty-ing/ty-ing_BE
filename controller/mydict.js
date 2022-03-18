@@ -173,7 +173,8 @@ const getMydict = async (req, res) => {
 const deleteMydict = async (req, res) => {
   try {
     const nickname = res.locals.user.nickname;
-    const { scriptId, word } = req.params;
+    let { scriptId, word } = req.params;
+    word = word.toLowerCase();
     
     const findMydict = await Mydict.findOne({
       nickname,

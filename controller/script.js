@@ -3,7 +3,7 @@ const Script = require("../models/script");
 module.exports.findScript = async (req, res) => {
   const { scriptType, scriptCategory } = req.params;
   try {
-    if (scriptType && scriptCategory === 1) {
+    if (scriptType && scriptCategory === "all") {
       const script = await Script.aggregate([
         { $sample: { size: 1}},
       ]);
@@ -11,7 +11,7 @@ module.exports.findScript = async (req, res) => {
       script,
       ok: true,
     })
-  } else if (scriptCategory ===1 ) {
+  } else if (scriptCategory === "all" ) {
       const script = await Script.aggregate([
         { $match: { scriptType: scriptType } },
         { $sample: { size: 1 } },

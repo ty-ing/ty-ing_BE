@@ -89,13 +89,12 @@ module.exports.scriptFilter = async (req, res) => {
 };
 
 module.exports.searchScripts = async (req, res) => {
-  const targetWord = await req.body.targetWord;
+  const targetWord = await req.params;
   const query = new RegExp(targetWord);
   try {
-    const targetSentence = await Script.find({ scriptParagraph: query });
-    console.log(targetSentence)
-
-    if (!targetSentence.length) {
+    const targetScripts = await Script.find({ scriptParagraph: query });
+    
+    if (!targetScripts.length) {
       throw "There is no proper data..";
     }
 
@@ -128,5 +127,3 @@ module.exports.scriptDetail = async (req, res) => {
     });
   }
 };
-
-Script.replaceOne;

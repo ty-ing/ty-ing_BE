@@ -43,7 +43,7 @@ module.exports.scriptFilter = async (req, res) => {
   try {
     const scriptCategory = req.query.scriptCategory;
     const scriptTopic = req.query.scriptTopic;
-    if (scriptCategory && scriptTopic === "all") {
+    if (scriptCategory === "all" && scriptTopic === "all") {
       const scripts = await Script.find();
       res.json({
         scripts,
@@ -88,8 +88,10 @@ module.exports.scriptFilter = async (req, res) => {
 module.exports.searchScripts = async (req, res) => {
   const targetWord = await req.body.targetWord;
   const query = new RegExp(targetWord);
+  console.log(query)
   try {
     const targetSentence = await Script.find({ scriptParagraph: query });
+    console.log(targetSentence)
 
     if (!targetSentence.length) {
       throw "There is no proper data..";

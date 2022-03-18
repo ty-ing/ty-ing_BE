@@ -137,7 +137,7 @@ const login = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ id: user.id, nickname: user.nickname }, process.env.TOKENKEY, { expiresIn: '24h'}); // 사용자를 구분하기 위해서 id를 JWT에 저장해주고 토큰 생성
+    const token = jwt.sign({ id: user.id, nickname: user.nickname }, process.env.TOKENKEY, { expiresIn: '1h'}); // 사용자를 구분하기 위해서 id를 JWT에 저장해주고 토큰 생성
     console.log(user.id);
     res.json({
       ok: true,
@@ -180,7 +180,7 @@ const kakaoCallback = (req, res, next) => {
     (err, user, info) => {
       if (err) return next(err);
       const { id, nickname } = user;
-      const token = jwt.sign({ id, nickname }, process.env.TOKENKEY,{ expiresIn: '24h'});
+      const token = jwt.sign({ id, nickname }, process.env.TOKENKEY, { expiresIn: '60s'});
       result = {
         token,
         id: user.id,
@@ -192,7 +192,7 @@ const kakaoCallback = (req, res, next) => {
 };
 
 const studyrecord = async (req, res) => {
-  try{
+  try {
     const id = res.locals.user.id;
     const { scriptId, scriptTitle, time, typingCnt } = req.body;
     const date = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
@@ -229,5 +229,5 @@ module.exports = {
   updateUserInfo, // 유저 정보 수정
   kakaoCallback, // 카카오 로그인
   studyrecord,
-  // mypage 
+  mypage 
 };

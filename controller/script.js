@@ -69,11 +69,11 @@ module.exports.scriptFilter = async (req, res) => {
         ok: true,
       });
     } else {
-      const scripts = await Script.aggregate([
-        {
-          $match: { scriptCategory: scriptCategory, scriptTopic: scriptTopic },
-        },
-      ]);
+        const scriptCategoryList = scriptCategory.split("|")
+        const scriptTopicList = scriptTopic.split("|")
+        const scripts = await Script.find(
+          { scriptCategory: { $in: scriptCategoryList}, scriptTopic: { $in: scriptTopicList} },
+     );
       res.json({
         scripts,
         ok: true,

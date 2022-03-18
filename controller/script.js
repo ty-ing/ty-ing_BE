@@ -4,14 +4,12 @@ module.exports.findScript = async (req, res) => {
   const { scriptType, scriptCategory } = req.params;
   try {
     if (scriptType && scriptCategory === "all") {
-      const script = await Script.aggregate([
-        { $sample: { size: 1}},
-      ]);
+      const script = await Script.aggregate([{ $sample: { size: 1 } }]);
       res.json({
-      script,
-      ok: true,
-    })
-  } else if (scriptCategory === "all" ) {
+        script,
+        ok: true,
+      });
+    } else if (scriptCategory === "all") {
       const script = await Script.aggregate([
         { $match: { scriptType: scriptType } },
         { $sample: { size: 1 } },
@@ -19,18 +17,18 @@ module.exports.findScript = async (req, res) => {
       res.json({
         script,
         ok: true,
-    })  
-  } else {
-   const script = await Script.aggregate([
-    { $match: { scriptType: scriptType , scriptCategory: scriptCategory } },
-    { $sample: { size: 1 } },
-   ]);
+      });
+    } else {
+      const script = await Script.aggregate([
+        { $match: { scriptType: scriptType, scriptCategory: scriptCategory } },
+        { $sample: { size: 1 } },
+      ]);
       res.json({
         script,
         ok: true,
       });
     }
-    } catch (err) {
+  } catch (err) {
     console.log(err);
     res.status(200).send({
       ok: false,
@@ -44,13 +42,39 @@ module.exports.scriptFilter = async (req, res) => {
   try {
     const scriptCategory = req.query.scriptCategory;
     const scriptTopic = req.query.scriptTopic;
-    const scripts = await Script.aggregate([
-      { $match: { scriptCategory: scriptCategory, scriptTopic: scriptTopic } },
-    ]);
-    res.json({
-      scripts,
-      ok: true,
-    });
+    if (scriptCategory && scriptTopic === "all") {
+      const scripts = await Script.find();
+      res.json({
+        scripts,
+        ok: true,
+      });
+    } else if (scriptCategory === "all") {
+      const scripts = await Script.aggregate([
+        { $match: { scriptTopic: scriptTopic } },
+      ]);
+      res.json({
+        scripts,
+        ok: true,
+      });
+    } else if (scriptTopic === "all") {
+      const scripts = await Script.aggregate([
+        { $match: { scriptCategory: scriptCategory } },
+      ]);
+      res.json({
+        scripts,
+        ok: true,
+      });
+    } else {
+      const scripts = await Script.aggregate([
+        {
+          $match: { scriptCategory: scriptCategory, scriptTopic: scriptTopic },
+        },
+      ]);
+      res.json({
+        scripts,
+        ok: true,
+      });
+    }
   } catch (err) {
     console.log(err);
     res.status(200).send({
@@ -99,3 +123,5 @@ module.exports.scriptDetail = async (req, res) => {
     });
   }
 };
+
+Script.replaceOne;

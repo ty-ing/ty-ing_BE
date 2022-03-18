@@ -229,5 +229,5 @@ module.exports = {
   updateUserInfo, // 유저 정보 수정
   kakaoCallback, // 카카오 로그인
   studyrecord,
-  mypage 
+  // mypage 
 };

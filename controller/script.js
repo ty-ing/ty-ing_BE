@@ -43,7 +43,6 @@ module.exports.scriptFilter = async (req, res) => {
   try {
     const scriptCategory = req.query.scriptCategory;
     const scriptTopic = req.query.scriptTopic;
-    console.log(scriptCategory,1, scriptTopic)
     if (scriptCategory === "all" && scriptTopic === "all") {
       const scripts = await Script.find();
       res.json({

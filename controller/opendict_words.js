@@ -1,4 +1,4 @@
-const Opendict = require("../models/opendict"); // 오픈사전 스키마
+const Opendict = require("../models/opendict"); // 오픈사전 단어장 스키마
 
 // 단어 뜻 추가
 const postWord = async (req, res) => {

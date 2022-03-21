@@ -147,7 +147,12 @@ const getMydict = async (req, res) => {
       }
 
       // // 좋아요 1위 단어 뜻 옆에 넣기
-      findOpendict[idx].push(...opendict, mydict.sentence, mydict.scriptId);
+      findOpendict[idx].push(
+        ...opendict,
+        mydict.word,
+        mydict.sentence,
+        mydict.scriptId
+      );
 
       // 객체 분리해서 넣어주기
       if (findOpendict[idx][0] || findOpendict[idx][1]) {
@@ -175,7 +180,7 @@ const deleteMydict = async (req, res) => {
     const nickname = res.locals.user.nickname;
     let { scriptId, word } = req.params;
     word = word.toLowerCase();
-    
+
     const findMydict = await Mydict.findOne({
       nickname,
       scriptId,

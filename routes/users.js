@@ -27,7 +27,7 @@ router.put('/info', authMiddleware, updateUserInfo);
 router.post('/studyrecord', authMiddleware, studyrecord);
 
 // 마이페이지
-// router.get('/mypage', authMiddleware, mypage)
+// router.get('/mypage', authMiddleware, mypage);
 
 // 카카오 로그인
 router.get("/kakao", passport.authenticate("kakao"));

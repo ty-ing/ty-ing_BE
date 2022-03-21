@@ -39,9 +39,9 @@ async function scriptDetail(req, res) {
 
 async function searchScripts(req, res) {
   const targetWord = await req.params;
-  const query = new RegExp(targetWord, "gi");
+  const RegWord = new RegExp(targetWord, "gi");
   try {
-    const targetScripts = await Script.find({ scriptParagraph: query });
+    const targetScripts = await Script.find({ scriptParagraph: RegWord });
     if (!targetScripts.length) {
       throw "There is no proper data..";
     }

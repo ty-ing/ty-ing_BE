@@ -194,8 +194,8 @@ const kakaoCallback = (req, res, next) => {
 const studyrecord = async (req, res) => {
   try {
     const id = res.locals.user.id;
-    const { scriptId, scriptTitle, time, typingCnt } = req.body;
-    const date = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
+    const { scriptId, scriptTitle, time, typingCnt, date } = req.body;
+    // const date = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
   
     await Studyrecord.create({ id, scriptId, scriptTitle, time, date:date, typingCnt});
     res.json({
@@ -210,15 +210,33 @@ const studyrecord = async (req, res) => {
   }
 };
 
-  // const mypage = async (req, res) => {
-  //   try {
-  //     const id = res.locals.user.id;
-  //     const nickname = res.locals.user.nickname;
-
-  //   } catch (error) {
-
-  //   }
-  // }
+  const mypage = async (req, res) => {
+    try {
+      const id = res.locals.user.id;
+      const nickname = res.locals.user.nickname;
+      const gettypingCnt = await Studyrecord.aggregate([
+        { $match: { id : id }},
+        { $group: { _id : '$date', total_typingCnt : { $sum : '$typingCnt'}}},
+      ]);
+      const gettime = await Studyrecord.aggregate([
+        { $match: { id : id }},
+        { $group: { _id : '$date', total_time : { $sum : '$time'}}},
+      ]);
+      res.json({
+        ok: true,
+        message: "조회 완료",
+        id,
+        nickname,
+        gettypingCnt,
+        gettime
+      });
+    } catch (error) {
+      res.json({
+        ok: false,
+        message: "조회 실패",
+    });
+  };
+}
 
 module.exports = {
   idCheck, // 회원가입에서 아이디 중복검사
@@ -229,5 +247,5 @@ module.exports = {
   updateUserInfo, // 유저 정보 수정
   kakaoCallback, // 카카오 로그인
   studyrecord,
-  // mypage 
+  mypage 
 };

@@ -3,7 +3,7 @@ const StudyrecordSchema = new mongoose.Schema({
   id: String,
   scriptId: Number,
   scriptTitle: String,
-  time: String,
+  time: Number,
   date: String,
   typingCnt: Number
 });

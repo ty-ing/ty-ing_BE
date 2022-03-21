@@ -52,11 +52,16 @@ app.set("view engine", "html");
 
 const scriptRouter = require("./routes/script");
 const usersRouter = require("./routes/users");
-const opendictRouter = require("./routes/opendict_words");
+const opendictWordsRouter = require("./routes/opendict_words");
+const opendictLikeDislikeRouter = require("./routes/opendict_likeDislike");
+const mydictRouter = require("./routes/mydict")
+
 
 app.use("/api", [scriptRouter]);
 app.use("/api", [usersRouter]);
-app.use("/opendict", [opendictRouter]);
+app.use("/opendict", [opendictWordsRouter]);
+app.use("/likeDislike", [opendictLikeDislikeRouter]);
+app.use("/mydict", [mydictRouter]);
 
 app.get("/admin", (req, res) => {
   res.render("insert_Scripts.html");

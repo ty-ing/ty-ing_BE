@@ -5,7 +5,7 @@ const UsersSchema = new mongoose.Schema({
   pwd: String,
   nickname: String,
   provider: String,
-  profileImg: String,
+  // profileImg: String,
 });
 
 

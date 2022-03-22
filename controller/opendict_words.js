@@ -88,7 +88,7 @@ const postWord = async (req, res) => {
     res.json({
       ok: true,
       message: "단어 뜻 추가 성공",
-      // wordId: findAddedWord.wordId,
+      wordId: findAddedWord.wordId,
     });
   } catch (error) {
     res.json({ ok: false, errorMessage: "단어 뜻 추가 실패" });

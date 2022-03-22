@@ -58,7 +58,7 @@ async function searchScripts(req, res) {
       },
     ]);
 
-    if (!targetScripts.length) {  
+    if (!targetScripts.length) {
       throw "There is no proper data..";
     }
     res.json({
@@ -98,10 +98,10 @@ async function scriptFilter(req, res) {
         });
         break;
       }
-      case scriptTopic !== "all" && scriptCategory === "all" : {
+      case scriptTopic !== "all" && scriptCategory === "all": {
         const scriptTopicList = scriptTopic.split("|");
         const scripts = await Script.find({
-            scriptTopic: { $in: scriptTopicList } ,
+          scriptTopic: { $in: scriptTopicList },
         });
         res.json({
           scripts,
@@ -112,10 +112,17 @@ async function scriptFilter(req, res) {
       case scriptCategory !== "all" && scriptTopic !== "all": {
         const scriptCategoryList = scriptCategory.split("|");
         const scriptTopicList = scriptTopic.split("|");
-        const scripts = await Script.find({
-            scriptCategory: { $in: scriptCategoryList } ,
-            scriptTopic: { $in: scriptTopicList } ,
-        });
+        console.log(... scriptTopicList)
+        const scripts = await Script.aggregate([
+          {
+            $match: {
+              $or: [
+                { scriptCategory: { $in: scriptCategoryList} },
+                { scriptTopic: { $in : scriptTopicList} },
+              ],
+            },
+          },
+        ]);
         res.json({
           scripts,
           ok: true,

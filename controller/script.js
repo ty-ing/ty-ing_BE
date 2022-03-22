@@ -38,16 +38,27 @@ async function scriptDetail(req, res) {
 }
 
 async function searchScripts(req, res) {
-  const paramWord = req.params; // 
-  const targetWord = paramWord.targetWord 
-  const RegWord = new RegExp(targetWord, "gi"); 
+  const paramWord = req.params; //
+  const targetWord = paramWord.targetWord;
+  const RegWord = new RegExp(targetWord, "gi");
   try {
     const targetScripts = await Script.aggregate([
-       { $unwind: "$scriptParagraph" }, {$match : {scriptParagraph: RegWord }},
-       {$group : {_id: "$_id", scriptTitle: {$addToSet: "$scriptTitle"}, scriptType: {$addToSet: "$scriptType"}, scriptCategory: {$addToSet: "$scriptCategory"}, scriptTopic: {$addToSet: "$scriptTopic"}, scriptParagraph: {$addToSet: "$scriptParagraph"}, scriptTranslate: {$addToSet: "$scriptTranslate"}, scriptSource: {$addToSet: "$scriptSource"}, scriptId: {$addToSet: "$scriptId"}}}
-    ])
+      { $unwind: "$scriptParagraph" },
+      { $match: { scriptParagraph: RegWord } },
+      {
+        $group: {
+          _id: "$_id",
+          scriptTitle: { $addToSet: "$scriptTitle" },
+          scriptType: { $addToSet: "$scriptType" },
+          scriptCategory: { $addToSet: "$scriptCategory" },
+          scriptTopic: { $addToSet: "$scriptTopic" },
+          scriptParagraph: { $addToSet: "$scriptParagraph" },
+          scriptId: { $addToSet: "$scriptId" },
+        },
+      },
+    ]);
 
-    if (!targetScripts.length) {
+    if (!targetScripts.length) {  
       throw "There is no proper data..";
     }
     res.json({
@@ -87,12 +98,23 @@ async function scriptFilter(req, res) {
         });
         break;
       }
-      case scriptCategory !== "all" && scriptTopic === "all": {
+      case scriptTopic !== "all" && scriptCategory === "all" : {
+        const scriptTopicList = scriptTopic.split("|");
+        const scripts = await Script.find({
+            scriptTopic: { $in: scriptTopicList } ,
+        });
+        res.json({
+          scripts,
+          ok: true,
+        });
+        break;
+      }
+      case scriptCategory !== "all" && scriptTopic !== "all": {
         const scriptCategoryList = scriptCategory.split("|");
         const scriptTopicList = scriptTopic.split("|");
         const scripts = await Script.find({
-          scriptCategory: { $in: scriptCategoryList },
-          scriptTopic: { $in: scriptTopicList },
+            scriptCategory: { $in: scriptCategoryList } ,
+            scriptTopic: { $in: scriptTopicList } ,
         });
         res.json({
           scripts,

@@ -55,7 +55,7 @@ const postWord = async (req, res) => {
     }
 
     if (meaningList.includes(meaning)) {
-      return res.json({ ok: false, errorMessage: "이미 있는 단어뜻 입니다." });
+      return res.json({ ok: false, errorMessage: "이미 있는 단어 뜻 입니다." });
     }
 
     // 단어 뜻 20자리 이하만 입력 가능

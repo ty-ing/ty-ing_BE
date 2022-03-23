@@ -113,7 +113,6 @@ const getWordForGuest = async (req, res) => {
       {
         $project: {
           _id: 0,
-          word: 1,
           meaning: 1,
           nickname: 1,
           likeCount: 1,
@@ -125,11 +124,7 @@ const getWordForGuest = async (req, res) => {
       { $sort: { count: -1 } },
       {
         $project: {
-          meaning: 1,
-          nickname: 1,
-          likeCount: 1,
-          dislikeCount: 1,
-          wordId: 1,
+          count : 0
         },
       },
       {
@@ -172,11 +167,8 @@ const getWordForUser = async (req, res) => {
       {
         $project: {
           _id: 0,
-          word: 1,
           meaning: 1,
           nickname: 1,
-          likeList: 1,
-          dislikeList: 1,
           likeCount: 1,
           dislikeCount: 1,
           count: 1,
@@ -186,11 +178,7 @@ const getWordForUser = async (req, res) => {
       { $sort: { count: -1 } },
       {
         $project: {
-          meaning: 1,
-          nickname: 1,
-          likeCount: 1,
-          dislikeCount: 1,
-          wordId: 1,
+          count: 0,
         },
       },
     ]);

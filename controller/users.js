@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken"); // jwt 토큰 사용
 const Joi = require("joi"); // 유효성 검증 라이브러리
 const bcrypt = require("bcrypt");
 const passport = require("passport");
-const res = require("express/lib/response");
+const Script = require("../models/script");
 
 // 이메일 중복확인 validate 할 스키마 .
 const idCheckSchema = Joi.object({
@@ -203,11 +203,11 @@ const kakaoCallback = (req, res, next) => {
 const studyrecord = async (req, res) => {
   try {
     const id = res.locals.user.id;
-    const { scriptId, scriptTitle, scriptType, scriptCategory, scriptTopic, time, typingCnt, duration } = req.body;
+    const { scriptId, time, typingCnt, duration } = req.body;
     const date = new Date(+new Date() + 3240 * 10000).toISOString();
     const datestring = new Date(+new Date() + 3240 * 10000).toISOString().replace(/\T.*/,'');
   
-    await Studyrecord.create({ id, scriptId, scriptTitle, scriptType, scriptCategory, scriptTopic, time, typingCnt, date, duration, datestring});
+    await Studyrecord.create({ id, scriptId, time, typingCnt, date, duration, datestring});
     res.json({
       ok: true,
       message: "등록 완료"
@@ -270,11 +270,16 @@ const certificate = async (req, res) => {
 
 const certificatedetail = async (req, res) => {
   try {
-  const { certificateId } = req.params;
+  const { certificateId, scriptId } = req.params;
+  const getscript = await Script.findOne({ scriptId });
   const getcertificatedetail = await Studyrecord.findOne({certificateId});
     res.json({
       ok:true,
       message: "조회 성공",
+      scriptTitle: getscript.scriptTitle,
+      scriptType: getscript.scriptType,
+      scriptCategory: getscript.scriptCategory,
+      scriptTopic: getscript.scriptTopic,
       getcertificatedetail
     })
   } catch (error) {

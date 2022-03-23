@@ -3,10 +3,6 @@ const AutoIncrement = require("mongoose-sequence")(mongoose);
 const StudyrecordSchema = new mongoose.Schema({
   id: String,
   scriptId: Number,
-  scriptTitle: String,
-  scriptType: String,
-  scriptCategory: String,
-  scriptTopic: String,
   duration: Number,
   date: Date,
   typingCnt: Number,

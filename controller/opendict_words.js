@@ -1,9 +1,11 @@
 const Opendict = require("../models/opendict"); // 오픈사전 단어장 스키마
+const fs = require("fs");
 
 // 단어 뜻 추가
 const postWord = async (req, res) => {
   try {
     const nickname = res.locals.user.nickname;
+    const id = res.locals.user.id;
     let { scriptId, word } = req.params;
     let { meaning } = req.body;
     word = word.toLowerCase();
@@ -20,6 +22,14 @@ const postWord = async (req, res) => {
         ok: false,
         errorMessage: "단어 뜻을 입력하지 않았습니다.",
       });
+    }
+
+    // 욕설 필터링
+    const fWords = await fs.promises.readFile(__dirname + "/../fwords/fwords.txt", "utf8") // 옵션 : 인코딩방식(utf8)
+    const isFword = fWords.split("\n").includes(meaning);
+
+    if(isFword) {
+      return res.json({ok : false, errorMessage : "욕설 혹은 올바르지 않은 뜻을 등록하는 경우 건전한 서비스 환경 제공에 어려움이 있으므로 서비스 이용이 제한될 수 있습니다."})
     }
 
     // 유저가 등록한 단어 이미 있는지 찾기
@@ -46,7 +56,7 @@ const postWord = async (req, res) => {
     }
 
     if (meaningList.includes(meaning)) {
-      return res.json({ ok: false, errorMessage: "이미 있는 단어뜻 입니다." });
+      return res.json({ ok: false, errorMessage: "이미 있는 단어 뜻 입니다." });
     }
 
     // 단어 뜻 20자리 이하만 입력 가능
@@ -62,6 +72,7 @@ const postWord = async (req, res) => {
 
     // 추가
     await Opendict.create({
+      id,
       nickname,
       scriptId,
       word,
@@ -104,7 +115,6 @@ const getWordForGuest = async (req, res) => {
       {
         $project: {
           _id: 0,
-          word: 1,
           meaning: 1,
           nickname: 1,
           likeCount: 1,
@@ -116,11 +126,7 @@ const getWordForGuest = async (req, res) => {
       { $sort: { count: -1 } },
       {
         $project: {
-          meaning: 1,
-          nickname: 1,
-          likeCount: 1,
-          dislikeCount: 1,
-          wordId: 1,
+          count : 0
         },
       },
       {
@@ -163,11 +169,8 @@ const getWordForUser = async (req, res) => {
       {
         $project: {
           _id: 0,
-          word: 1,
           meaning: 1,
           nickname: 1,
-          likeList: 1,
-          dislikeList: 1,
           likeCount: 1,
           dislikeCount: 1,
           count: 1,
@@ -177,11 +180,7 @@ const getWordForUser = async (req, res) => {
       { $sort: { count: -1 } },
       {
         $project: {
-          meaning: 1,
-          nickname: 1,
-          likeCount: 1,
-          dislikeCount: 1,
-          wordId: 1,
+          count: 0,
         },
       },
     ]);
@@ -253,7 +252,10 @@ const putWord = async (req, res) => {
     }
 
     // 수정
-    await Opendict.updateOne({ scriptId, wordId }, { $set: { meaning: meaning } });
+    await Opendict.updateOne(
+      { scriptId, wordId },
+      { $set: { meaning: meaning } }
+    );
 
     res.json({ ok: true, message: "단어 뜻 수정 성공" });
   } catch (error) {

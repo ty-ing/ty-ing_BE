@@ -5,6 +5,7 @@ const OpendictSchema = new mongoose.Schema({
   scriptId: String,
   word: String,
   meaning : String,
+  id : String,
   nickname: String,
   likeList : Array,
   dislikeList : Array,

@@ -284,7 +284,7 @@ const certificatedetail = async (req, res) => {
     })
   } catch (error) {
     res.json({
-      ok:true,
+      ok:false,
       message:"조회 실패"
     })
     console.error(`${error} 에러로 조회 실패`);

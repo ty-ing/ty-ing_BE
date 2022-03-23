@@ -1,7 +1,6 @@
 {
   "name": "real",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "server": "nodemon app.js"
@@ -27,5 +26,14 @@
     "geckodriver": "^3.0.1",
     "nodemon": "^2.0.15",
     "selenium-webdriver": "^4.1.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ty-ing/ty-ing_BE.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ty-ing/ty-ing_BE/issues"
+  },
+  "homepage": "https://github.com/ty-ing/ty-ing_BE#readme",
+  "description": ""
 }

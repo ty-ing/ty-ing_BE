@@ -32,7 +32,7 @@ router.post('/mypage/statistic', authMiddleware, statistic);
 
 // 마이페이지(인증서)
 router.get('/mypage/certificate', authMiddleware, certificate);
-router.get('/mypage/certificate/:certificateId', authMiddleware, certificatedetail);
+router.get('/mypage/certificate/:certificateId/:scriptId', authMiddleware, certificatedetail);
 
 // 카카오 로그인
 router.get("/kakao", passport.authenticate("kakao"));

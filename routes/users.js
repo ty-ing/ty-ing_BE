@@ -3,7 +3,8 @@ const router = express.Router();
 const authMiddleware = require('../middlewares/auth-middleware');
 const passport = require("passport");
 
-const { signup, idCheck, nicknameCheck, login, auth, updateUserInfo, studyrecord, mypage, kakaoCallback } = require('../controller/users'); 
+const { signup, idCheck, nicknameCheck, login, auth, updateUserInfo, 
+        studyrecord, statistic, certificate, certificatedetail, kakaoCallback } = require('../controller/users'); 
 
 // 회원가입
 router.post('/signup', signup);
@@ -26,8 +27,12 @@ router.put('/info', authMiddleware, updateUserInfo);
 // 결과 저장
 router.post('/studyrecord', authMiddleware, studyrecord);
 
-// 마이페이지
-router.get('/mypage', authMiddleware, mypage);
+// 마이페이지(통계)
+router.post('/mypage/statistic', authMiddleware, statistic);
+
+// 마이페이지(인증서)
+router.get('/mypage/certificate', authMiddleware, certificate);
+router.get('/mypage/certificate/:certificateId', authMiddleware, certificatedetail);
 
 // 카카오 로그인
 router.get("/kakao", passport.authenticate("kakao"));

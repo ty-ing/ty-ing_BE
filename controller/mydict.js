@@ -64,6 +64,19 @@ const postMydict = async (req, res) => {
 // 나만의 단어장 단어(단어 뜻) 최신순 4개만 가져오기
 const getMydictSome = async (req, res) => {
   try {
+    const nickname = res.locals.user.nickname;
+
+    // 나만의 단어장에서 등록한 단어 찾기
+    const findMydictWords = await Mydict.aggregate([
+      { $match: { nickname } },
+      { $project: { _id: 0, nickname: 1, scriptId: 1, word: 1, sentence: 1 } },
+    ]);
+
+    // 나만의 단어장에 등록한 단어가 없을 때
+    if (!findMydictWords.length) {
+      return res.json({ ok: false, errorMessage: "등록한 단어가 없습니다." });
+    }
+
     let mydictMeanings = await getMydictMeanings(req, res);
     mydictMeanings = mydictMeanings.reverse().slice(0, 4);
 
@@ -81,6 +94,19 @@ const getMydictSome = async (req, res) => {
 // 나만의 단어장 전체 단어(단어 뜻) 가져오기
 const getMydictAll = async (req, res) => {
   try {
+    const nickname = res.locals.user.nickname;
+
+    // 나만의 단어장에서 등록한 단어 찾기
+    const findMydictWords = await Mydict.aggregate([
+      { $match: { nickname } },
+      { $project: { _id: 0, nickname: 1, scriptId: 1, word: 1, sentence: 1 } },
+    ]);
+
+    // 나만의 단어장에 등록한 단어가 없을 때
+    if (!findMydictWords.length) {
+      return res.json({ ok: false, errorMessage: "등록한 단어가 없습니다." });
+    }
+
     let mydictMeanings = await getMydictMeanings(req, res);
     mydictMeanings = mydictMeanings.reverse();
 
@@ -140,11 +166,6 @@ async function getMydictMeanings(req, res) {
     { $match: { nickname } },
     { $project: { _id: 0, nickname: 1, scriptId: 1, word: 1, sentence: 1 } },
   ]);
-
-  // 나만의 단어장에 등록한 단어가 없을 때
-  if (!findMydictWords.length) {
-    return res.json({ ok: false, errorMessage: "등록한 단어가 없습니다." });
-  }
 
   // 오픈사전 단어장에서 좋아요 1위 단어 뜻 가져오기 -> 나만의 단어장 단어 뜻으로 저장
   let mydictMeanings = [];

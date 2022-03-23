@@ -77,76 +77,25 @@ const getMydict = async (req, res) => {
       return res.json({ ok: false, errorMessage: "등록한 단어가 없습니다." });
     }
 
-    // 리스트를 통해서 오픈사전 단어장에서 좋아요 1위 단어 뜻 가져오기
+    // 오픈사전 단어장에서 좋아요 1위 단어 뜻 가져오기
     let findOpendict = [];
     for (let mydict of findMydict) {
-      const opendict = await Opendict.aggregate([
-        {
-          $match: {
-            scriptId: mydict.scriptId,
-            word: mydict.word,
-          },
-        },
-        {
-          $project: {
-            _id: 0,
-            nickname: 1,
-            word: 1,
-            meaning: 1,
-            count: 1,
-          },
-        },
-        { $sort: { count: -1 } },
-        {
-          $group: {
-            _id: "$word",
-            meaning: { $first: "$meaning" },
-          },
-        },
-        {
-          $project: {
-            _id: 0,
-            meaning: 1,
-          },
-        },
-      ]);
+      const opendict = await findMostLikedMeaning(mydict);
 
       findOpendict.push(opendict);
     }
 
-    // 리스트를 통해서 오픈사전 단어장에서 내가 등록한 단어 찾아오기
+    // 오픈사전 단어장에서 내가 등록한 단어 찾아오기
     let idx = 0;
     for (let mydict of findMydict) {
-      let opendict = await Opendict.aggregate([
-        { $match: { scriptId: mydict.scriptId, word: mydict.word, nickname } },
-        {
-          $project: {
-            _id: 0,
-            nickname: 1,
-            word: 1,
-            meaning: 1,
-          },
-        },
-        {
-          $group: {
-            _id: "$word",
-            meaning: { $first: "$meaning" },
-          },
-        },
-        {
-          $project: {
-            _id: 0,
-            meaning: 1,
-          },
-        },
-      ]);
+      let opendict = await findMyMeaning(mydict, nickname);
 
       // 내가 등록한 단어가 없을 때 빈 칸으로 넣어줌
       if (opendict.length === 0) {
         opendict = [{ meaning: "" }];
       }
 
-      // // 좋아요 1위 단어 뜻 옆에 넣기
+      // 좋아요 1위 단어 뜻 옆에 넣기
       findOpendict[idx].push(
         ...opendict,
         mydict.word,
@@ -172,7 +121,56 @@ const getMydict = async (req, res) => {
     res.json({ ok: false, errorMessage: "나만의 단어장 단어 조회 실패" });
     console.error(`${error} 에러로 나만의 단어장 단어 조회 실패`);
   }
+
+  // function : 오픈사전 단어장에서 좋아요 1위 단어 뜻 찾아오기
+  async function findMostLikedMeaning(mydict) {
+    return await Opendict.aggregate([
+      {
+        $match: {
+          scriptId: mydict.scriptId,
+          word: mydict.word,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          nickname: 1,
+          word: 1,
+          meaning: 1,
+          count: 1,
+        },
+      },
+      { $sort: { count: -1 } },
+      {
+        $group: {
+          _id: "$word",
+          meaning: { $first: "$meaning" },
+        },
+      }
+    ]);
+  }
 };
+
+// function : 오픈사전 단어장에서 내가 등록한 단어 뜻 찾아오기
+async function findMyMeaning(mydict, nickname) {
+  return await Opendict.aggregate([
+    { $match: { scriptId: mydict.scriptId, word: mydict.word, nickname } },
+    {
+      $project: {
+        _id: 0,
+        nickname: 1,
+        word: 1,
+        meaning: 1,
+      },
+    },
+    {
+      $group: {
+        _id: "$word",
+        meaning: { $first: "$meaning" },
+      },
+    }
+  ]);
+}
 
 // 나만의 단어장 단어 삭제하기
 const deleteMydict = async (req, res) => {

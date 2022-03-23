@@ -53,6 +53,7 @@ const likeUp = async (req, res) => {
       { $set: { count: findCount.likeCount - findCount.dislikeCount } }
     );
 
+    // 사용자가 좋아요 눌렀는지 안 눌렀는지
     const isLike = findCount.likeList.includes(nickname);
     const isDislike = findCount.dislikeList.includes(nickname);
 
@@ -102,7 +103,15 @@ const likeDown = async (req, res) => {
     );
 
     // 좋아요 - 싫어요 count 업데이트
-    const findCount = await Opendict.findOne({ scriptId, wordId });
+    const findCount = await Opendict.findOne({ scriptId, wordId }); // 업데이트 된 카운트 찾기
+    await Opendict.updateOne(
+      { scriptId, wordId },
+      {
+        $set: {
+          count: findCount.likeCount - findCount.dislikeCount,
+        },
+      }
+    );
 
     const isLike = findCount.likeList.includes(nickname);
     const isDislike = findCount.dislikeList.includes(nickname);
@@ -248,8 +257,18 @@ const dislikeDown = async (req, res) => {
       { $pull: { dislikeList: nickname }, $inc: { dislikeCount: -1 } }
     );
 
-    const findCount = await Opendict.findOne({ scriptId, wordId });
+    // 좋아요 - 싫어요 count 업데이트
+    const findCount = await Opendict.findOne({ scriptId, wordId }); // 업데이트 된 카운트 찾기
+    await Opendict.updateOne(
+      { scriptId, wordId },
+      {
+        $set: {
+          count: findCount.likeCount - findCount.dislikeCount,
+        },
+      }
+    );
 
+    // 사용자가 좋아요 눌렀는지 안 눌렀는지
     const isLike = findCount.likeList.includes(nickname);
     const isDislike = findCount.dislikeList.includes(nickname);
 

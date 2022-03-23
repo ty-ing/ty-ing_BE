@@ -18,12 +18,12 @@ const postMydict = async (req, res) => {
     }
 
     // 오픈사전 단어장에 단어 뜻이 있는 경우만 나만의 단어장에 저장 가능
-    const findOpendict = await Opendict.find({
+    const findOpendictMeanings = await Opendict.find({
       scriptId,
       word,
     });
 
-    if (!findOpendict.length) {
+    if (!findOpendictMeanings.length) {
       return res.json({
         ok: false,
         errorMessage:
@@ -32,14 +32,14 @@ const postMydict = async (req, res) => {
     }
 
     // 나만의 단어장에 이미 등록된 단어인지 찾기
-    const findMydict = await Mydict.findOne({
+    const findMydictWord = await Mydict.findOne({
       nickname,
       scriptId,
       word,
     });
 
     // 나만의 단어장에 이미 등록한 단어일 때 등록 불가
-    if (findMydict) {
+    if (findMydictWord) {
       return res.json({
         ok: false,
         errorMessage: "나만의 단어장에 이미 등록한 단어입니다.",
@@ -61,52 +61,52 @@ const postMydict = async (req, res) => {
   }
 };
 
-// 나만의 단어장 전체 단어 가져오기
+// 나만의 단어장 전체 단어(단어 뜻) 가져오기
 const getMydict = async (req, res) => {
   try {
     const nickname = res.locals.user.nickname;
 
     // 나만의 단어장에서 등록한 단어 찾기
-    const findMydict = await Mydict.aggregate([
+    const findMydictWords = await Mydict.aggregate([
       { $match: { nickname } },
       { $project: { _id: 0, nickname: 1, scriptId: 1, word: 1, sentence: 1 } },
     ]);
 
     // 나만의 단어장에 등록한 단어가 없을 때
-    if (!findMydict.length) {
+    if (!findMydictWords.length) {
       return res.json({ ok: false, errorMessage: "등록한 단어가 없습니다." });
     }
 
-    // 오픈사전 단어장에서 좋아요 1위 단어 뜻 가져오기
-    let findOpendict = [];
-    for (let mydict of findMydict) {
-      const opendict = await findMostLikedMeaning(mydict);
+    // 오픈사전 단어장에서 좋아요 1위 단어 뜻 가져오기 -> 나만의 단어장 단어 뜻으로 저장
+    let mydictMeanings = [];
+    for (let mydictWord of findMydictWords) {
+      const findOpendictMeaning = await findMostLikedMeaning(mydictWord);
 
-      findOpendict.push(opendict);
+      mydictMeanings.push(findOpendictMeaning);
     }
 
-    // 오픈사전 단어장에서 내가 등록한 단어 찾아오기
+    // 오픈사전 단어장에서 내가 등록한 단어 뜻 찾아오기 -> 나만의 단어장 단어 뜻으로 저장
     let idx = 0;
-    for (let mydict of findMydict) {
-      let opendict = await findMyMeaning(mydict, nickname);
+    for (let mydictWord of findMydictWords) {
+      let findOpendictMeaning = await findMyMeaning(mydictWord, nickname);
 
-      // 내가 등록한 단어가 없을 때 빈 칸으로 넣어줌
-      if (opendict.length === 0) {
-        opendict = [{ meaning: "" }];
+      // 내가 등록한 단어 뜻이 없을 때 빈 칸으로 넣어줌
+      if (findOpendictMeaning.length === 0) {
+        findOpendictMeaning = [{ meaning: "" }];
       }
 
-      // 좋아요 1위 단어 뜻 옆에 넣기
-      findOpendict[idx].push(
-        ...opendict,
-        mydict.word,
-        mydict.sentence,
-        mydict.scriptId
+      // 좋아요 1위 단어 뜻 옆에 넣기 (아까 찾아서 나만의 단어장 뜻에 추가해 놓았었음)
+      mydictMeanings[idx].push(
+        ...findOpendictMeaning,
+        mydictWord.word,
+        mydictWord.sentence,
+        mydictWord.scriptId
       );
 
       // 객체 분리해서 넣어주기
-      if (findOpendict[idx][0] || findOpendict[idx][1]) {
-        findOpendict[idx][0] = findOpendict[idx][0].meaning;
-        findOpendict[idx][1] = findOpendict[idx][1].meaning;
+      if (mydictMeanings[idx][0] || mydictMeanings[idx][1]) {
+        mydictMeanings[idx][0] = mydictMeanings[idx][0].meaning;
+        mydictMeanings[idx][1] = mydictMeanings[idx][1].meaning;
       }
 
       idx++;
@@ -115,7 +115,7 @@ const getMydict = async (req, res) => {
     res.json({
       ok: true,
       message: "나만의 단어장 단어 조회 성공",
-      mydict: findOpendict.reverse(),
+      mydict: mydictMeanings.reverse(),
     });
   } catch (error) {
     res.json({ ok: false, errorMessage: "나만의 단어장 단어 조회 실패" });
@@ -179,14 +179,14 @@ const deleteMydict = async (req, res) => {
     let { scriptId, word } = req.params;
     word = word.toLowerCase();
 
-    const findMydict = await Mydict.findOne({
+    const findMydictWord = await Mydict.findOne({
       nickname,
       scriptId,
       word,
     });
 
     // 나만의 단어장에 등록하지 않은 단어이거나, 이미 삭제 했을 때
-    if (!findMydict) {
+    if (!findMydictWord) {
       return res.json({
         ok: false,
         errorMessage: "단어를 등록하지 않으셨거나 이미 단어를 삭제하셨습니다.",

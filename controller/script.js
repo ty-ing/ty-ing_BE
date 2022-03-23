@@ -76,16 +76,22 @@ async function searchScripts(req, res) {
 
 async function scriptFilter(req, res) {
   try {
+    const page = parseInt(req.query.page)
+    const hideScript = ((page - 1) * 8)
     const scriptCategory = req.query.scriptCategory;
     const scriptTopic = req.query.scriptTopic;
     switch (true) {
       case scriptCategory === "all" && scriptTopic === "all": {
-        const scripts = await Script.find();
+        if (Script.countDocuments < hideScript || Script.countDocuments == null) {
+          throw err
+        } else{
+        const scripts = await Script.find().sort({_id : 1}).skip(hideScript).limit(8)
         res.json({
           scripts,
           ok: true,
         });
         break;
+      }
       }
       case scriptTopic === "all" && scriptCategory !== "all": {
         const scriptCategoryList = scriptCategory.split("|");
@@ -112,13 +118,12 @@ async function scriptFilter(req, res) {
       case scriptCategory !== "all" && scriptTopic !== "all": {
         const scriptCategoryList = scriptCategory.split("|");
         const scriptTopicList = scriptTopic.split("|");
-        console.log(... scriptTopicList)
         const scripts = await Script.aggregate([
           {
             $match: {
               $or: [
-                { scriptCategory: { $in: scriptCategoryList} },
-                { scriptTopic: { $in : scriptTopicList} },
+                { scriptCategory: { $in: scriptCategoryList } },
+                { scriptTopic: { $in: scriptTopicList } },
               ],
             },
           },
@@ -166,7 +171,6 @@ async function findScript(req, res) {
         break;
       case scriptCategory !== "all" && scriptType !== "all":
         {
-          console.log(scriptCategory, scriptType);
           const script = await Script.aggregate([
             {
               $match: {

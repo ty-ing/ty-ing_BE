@@ -1,3 +1,4 @@
+const { not } = require("joi");
 const Script = require("../models/script");
 
 //메인화면 랜덤한 스크립트 불러오기
@@ -37,6 +38,7 @@ async function scriptDetail(req, res) {
   }
 }
 
+  
 async function searchScripts(req, res) {
   try {
     const page = parseInt(req.query.page);
@@ -74,18 +76,20 @@ async function searchScripts(req, res) {
     ]);
 
     if (!scriptAmount.length) {
-      throw "There is no proper data..";
+      throw "There is no proper data.."
     }
 
     const totalScript = scriptAmount[0].scriptId;
     if (totalScript < hideScript || totalScript == null) {
-      throw "There is no proper data..";
-    }
-
-    res.json({
-      targetScripts,
-      ok: true,
-    });
+      res.json({
+        ok:"no"
+      })
+    } else {
+      res.json({
+        targetScripts,
+        ok: true,
+      });
+    }   
   } catch (err) {
     console.error(err);
     res.status(200).send({
@@ -128,7 +132,10 @@ async function scriptFilter(req, res) {
           scriptCategory: { $in: scriptCategoryList },
         }).count();
         if (totalScript < hideScript || totalScript == null) {
-          throw "There is no proper data..";
+         res.json({
+           ok:"no"
+         })
+         break;
         }
           res.json({
             scripts,
@@ -147,7 +154,10 @@ async function scriptFilter(req, res) {
           scriptTopic: { $in: scriptTopicList },
         }).count();
         if (totalScript < hideScript || totalScript == null) {
-          throw "There is no proper data..";
+          res.json({
+            ok:"no"
+          })
+          break;
         }
           res.json({
             scripts,
@@ -185,7 +195,10 @@ async function scriptFilter(req, res) {
         const totalScript = scriptAmount[0].scriptId;
 
         if (totalScript < hideScript || totalScript == null) {
-          throw "There is no proper data..";
+          res.json({
+            ok:"no"
+          })
+          break;
         }
           res.json({
             scripts,

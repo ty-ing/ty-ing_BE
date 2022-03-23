@@ -64,54 +64,7 @@ const postMydict = async (req, res) => {
 // 나만의 단어장 단어(단어 뜻) 최신순 4개만 가져오기
 const getMydictSome = async (req, res) => {
   try {
-    const nickname = res.locals.user.nickname;
-
-    // 나만의 단어장에서 등록한 단어 찾기
-    const findMydictWords = await Mydict.aggregate([
-      { $match: { nickname } },
-      { $project: { _id: 0, nickname: 1, scriptId: 1, word: 1, sentence: 1 } },
-    ]);
-
-    // 나만의 단어장에 등록한 단어가 없을 때
-    if (!findMydictWords.length) {
-      return res.json({ ok: false, errorMessage: "등록한 단어가 없습니다." });
-    }
-
-    // 오픈사전 단어장에서 좋아요 1위 단어 뜻 가져오기 -> 나만의 단어장 단어 뜻으로 저장
-    let mydictMeanings = [];
-    for (let mydictWord of findMydictWords) {
-      const findOpendictMeaning = await findMostLikedMeaning(mydictWord);
-
-      mydictMeanings.push(findOpendictMeaning);
-    }
-
-    // 오픈사전 단어장에서 내가 등록한 단어 뜻 찾아오기 -> 나만의 단어장 단어 뜻으로 저장
-    let idx = 0;
-    for (let mydictWord of findMydictWords) {
-      let findOpendictMeaning = await findMyMeaning(mydictWord, nickname);
-
-      // 내가 등록한 단어 뜻이 없을 때 빈 칸으로 넣어줌
-      if (findOpendictMeaning.length === 0) {
-        findOpendictMeaning = [{ meaning: "" }];
-      }
-
-      // 좋아요 1위 단어 뜻 옆에 넣기 (아까 찾아서 나만의 단어장 뜻에 추가해 놓았었음)
-      mydictMeanings[idx].push(
-        ...findOpendictMeaning,
-        mydictWord.word,
-        mydictWord.sentence,
-        mydictWord.scriptId
-      );
-
-      // 객체 분리해서 넣어주기
-      if (mydictMeanings[idx][0] || mydictMeanings[idx][1]) {
-        mydictMeanings[idx][0] = mydictMeanings[idx][0].meaning;
-        mydictMeanings[idx][1] = mydictMeanings[idx][1].meaning;
-      }
-
-      idx++;
-    }
-
+    let mydictMeanings = await getMydictMeanings(req, res);
     mydictMeanings = mydictMeanings.reverse().slice(0, 4);
 
     res.json({
@@ -128,54 +81,7 @@ const getMydictSome = async (req, res) => {
 // 나만의 단어장 전체 단어(단어 뜻) 가져오기
 const getMydictAll = async (req, res) => {
   try {
-    const nickname = res.locals.user.nickname;
-
-    // 나만의 단어장에서 등록한 단어 찾기
-    const findMydictWords = await Mydict.aggregate([
-      { $match: { nickname } },
-      { $project: { _id: 0, nickname: 1, scriptId: 1, word: 1, sentence: 1 } },
-    ]);
-
-    // 나만의 단어장에 등록한 단어가 없을 때
-    if (!findMydictWords.length) {
-      return res.json({ ok: false, errorMessage: "등록한 단어가 없습니다." });
-    }
-
-    // 오픈사전 단어장에서 좋아요 1위 단어 뜻 가져오기 -> 나만의 단어장 단어 뜻으로 저장
-    let mydictMeanings = [];
-    for (let mydictWord of findMydictWords) {
-      const findOpendictMeaning = await findMostLikedMeaning(mydictWord);
-
-      mydictMeanings.push(findOpendictMeaning);
-    }
-
-    // 오픈사전 단어장에서 내가 등록한 단어 뜻 찾아오기 -> 나만의 단어장 단어 뜻으로 저장
-    let idx = 0;
-    for (let mydictWord of findMydictWords) {
-      let findOpendictMeaning = await findMyMeaning(mydictWord, nickname);
-
-      // 내가 등록한 단어 뜻이 없을 때 빈 칸으로 넣어줌
-      if (findOpendictMeaning.length === 0) {
-        findOpendictMeaning = [{ meaning: "" }];
-      }
-
-      // 좋아요 1위 단어 뜻 옆에 넣기 (아까 찾아서 나만의 단어장 뜻에 추가해 놓았었음)
-      mydictMeanings[idx].push(
-        ...findOpendictMeaning,
-        mydictWord.word,
-        mydictWord.sentence,
-        mydictWord.scriptId
-      );
-
-      // 객체 분리해서 넣어주기
-      if (mydictMeanings[idx][0] || mydictMeanings[idx][1]) {
-        mydictMeanings[idx][0] = mydictMeanings[idx][0].meaning;
-        mydictMeanings[idx][1] = mydictMeanings[idx][1].meaning;
-      }
-
-      idx++;
-    }
-
+    let mydictMeanings = await getMydictMeanings(req, res);
     mydictMeanings = mydictMeanings.reverse();
 
     res.json({
@@ -188,6 +94,59 @@ const getMydictAll = async (req, res) => {
     console.error(`${error} 에러로 나만의 단어장 단어 조회 실패`);
   }
 };
+
+// function : 나만의 단어장 단어(단어 뜻)가져오기
+async function getMydictMeanings(req, res) {
+  const nickname = res.locals.user.nickname;
+
+  // 나만의 단어장에서 등록한 단어 찾기
+  const findMydictWords = await Mydict.aggregate([
+    { $match: { nickname } },
+    { $project: { _id: 0, nickname: 1, scriptId: 1, word: 1, sentence: 1 } },
+  ]);
+
+  // 나만의 단어장에 등록한 단어가 없을 때
+  if (!findMydictWords.length) {
+    return res.json({ ok: false, errorMessage: "등록한 단어가 없습니다." });
+  }
+
+  // 오픈사전 단어장에서 좋아요 1위 단어 뜻 가져오기 -> 나만의 단어장 단어 뜻으로 저장
+  let mydictMeanings = [];
+  for (let mydictWord of findMydictWords) {
+    const findOpendictMeaning = await findMostLikedMeaning(mydictWord);
+
+    mydictMeanings.push(findOpendictMeaning);
+  }
+
+  // 오픈사전 단어장에서 내가 등록한 단어 뜻 찾아오기 -> 나만의 단어장 단어 뜻으로 저장
+  let idx = 0;
+  for (let mydictWord of findMydictWords) {
+    let findOpendictMeaning = await findMyMeaning(mydictWord, nickname);
+
+    // 내가 등록한 단어 뜻이 없을 때 빈 칸으로 넣어줌
+    if (findOpendictMeaning.length === 0) {
+      findOpendictMeaning = [{ meaning: "" }];
+    }
+
+    // 좋아요 1위 단어 뜻 옆에 넣기 (아까 찾아서 나만의 단어장 뜻에 추가해 놓았었음)
+    mydictMeanings[idx].push(
+      ...findOpendictMeaning,
+      mydictWord.word,
+      mydictWord.sentence,
+      mydictWord.scriptId
+    );
+
+    // 객체 분리해서 넣어주기
+    if (mydictMeanings[idx][0] || mydictMeanings[idx][1]) {
+      mydictMeanings[idx][0] = mydictMeanings[idx][0].meaning;
+      mydictMeanings[idx][1] = mydictMeanings[idx][1].meaning;
+    }
+
+    idx++;
+  }
+
+  return mydictMeanings;
+}
 
 // function : 오픈사전 단어장에서 좋아요 1위 단어 뜻 찾아오기
 async function findMostLikedMeaning(mydict) {

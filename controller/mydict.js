@@ -95,6 +95,42 @@ const getMydictAll = async (req, res) => {
   }
 };
 
+// 나만의 단어장 단어 삭제하기
+const deleteMydict = async (req, res) => {
+  try {
+    const nickname = res.locals.user.nickname;
+    let { scriptId, word } = req.params;
+    word = word.toLowerCase();
+
+    const findMydictWord = await Mydict.findOne({
+      nickname,
+      scriptId,
+      word,
+    });
+
+    // 나만의 단어장에 등록하지 않은 단어이거나, 이미 삭제 했을 때
+    if (!findMydictWord) {
+      return res.json({
+        ok: false,
+        errorMessage: "단어를 등록하지 않으셨거나 이미 단어를 삭제하셨습니다.",
+      });
+    }
+
+    // 삭제
+    await Mydict.deleteOne({
+      nickname,
+      word,
+      scriptId,
+      word,
+    });
+
+    res.json({ ok: true, message: "나만의 단어장 단어 삭제 성공" });
+  } catch (error) {
+    res.json({ ok: false, errorMessage: "나만의 단어장 단어 삭제 실패" });
+    console.error(`${error} 에러로 나만의 단어장 단어 삭제 실패`);
+  }
+};
+
 // function : 나만의 단어장 단어(단어 뜻)가져오기
 async function getMydictMeanings(req, res) {
   const nickname = res.locals.user.nickname;
@@ -196,42 +232,6 @@ async function findMyMeaning(mydict, nickname) {
     },
   ]);
 }
-
-// 나만의 단어장 단어 삭제하기
-const deleteMydict = async (req, res) => {
-  try {
-    const nickname = res.locals.user.nickname;
-    let { scriptId, word } = req.params;
-    word = word.toLowerCase();
-
-    const findMydictWord = await Mydict.findOne({
-      nickname,
-      scriptId,
-      word,
-    });
-
-    // 나만의 단어장에 등록하지 않은 단어이거나, 이미 삭제 했을 때
-    if (!findMydictWord) {
-      return res.json({
-        ok: false,
-        errorMessage: "단어를 등록하지 않으셨거나 이미 단어를 삭제하셨습니다.",
-      });
-    }
-
-    // 삭제
-    await Mydict.deleteOne({
-      nickname,
-      word,
-      scriptId,
-      word,
-    });
-
-    res.json({ ok: true, message: "나만의 단어장 단어 삭제 성공" });
-  } catch (error) {
-    res.json({ ok: false, errorMessage: "나만의 단어장 단어 삭제 실패" });
-    console.error(`${error} 에러로 나만의 단어장 단어 삭제 실패`);
-  }
-};
 
 module.exports = {
   postMydict,

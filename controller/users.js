@@ -1,5 +1,7 @@
 const Users = require("../models/users"); // 유저 스키마
 const Studyrecord = require("../models/studyrecord");
+const Opendict = require("../models/opendict");
+const Mydict = require("../models/mydict");
 const jwt = require("jsonwebtoken"); // jwt 토큰 사용
 const Joi = require("joi"); // 유효성 검증 라이브러리
 const bcrypt = require("bcrypt");
@@ -62,6 +64,13 @@ const updateUserInfo = async (req, res) => {
     const { nickname } = await nicknameCheckSchema.validateAsync(req.body); // Joi 유효성 검사
     
     await Users.updateOne({ id },{ $set: { nickname }})
+
+    // 오픈사전 단어장에 등록되어 있는 닉네임 변경
+    await Opendict.updateMany({id}, {$set : {nickname : nickname} })
+
+    // 나만의 단어장에 등록되어 있는 닉네임 변경
+    await Mydict.updateMany({id}, {$set : {nickname : nickname} })
+
     res.status(201).json({ ok: true, message: "수정 완료" });
   } catch (error) {
     res.status(400).json({
@@ -194,10 +203,11 @@ const kakaoCallback = (req, res, next) => {
 const studyrecord = async (req, res) => {
   try {
     const id = res.locals.user.id;
-    const { scriptId, scriptTitle, time, typingCnt, date } = req.body;
-    // const date = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
+    const { scriptId, scriptTitle, scriptType, scriptCategory, scriptTopic, time, typingCnt, duration } = req.body;
+    const date = new Date(+new Date() + 3240 * 10000).toISOString();
+    const datestring = new Date(+new Date() + 3240 * 10000).toISOString().replace(/\T.*/,'');
   
-    await Studyrecord.create({ id, scriptId, scriptTitle, time, date:date, typingCnt});
+    await Studyrecord.create({ id, scriptId, scriptTitle, scriptType, scriptCategory, scriptTopic, time, typingCnt, date, duration, datestring});
     res.json({
       ok: true,
       message: "등록 완료"
@@ -207,37 +217,74 @@ const studyrecord = async (req, res) => {
       ok: false,
       message: "등록 실패"
     });
+    console.error(`${error} 에러로 등록 실패`);
   }
 };
 
-  const mypage = async (req, res) => {
+  const statistic = async (req, res) => {
     try {
       const id = res.locals.user.id;
       const nickname = res.locals.user.nickname;
-      const gettypingCnt = await Studyrecord.aggregate([
-        { $match: { id : id }},
-        { $group: { _id : '$date', total_typingCnt : { $sum : '$typingCnt'}}},
-      ]);
-      const gettime = await Studyrecord.aggregate([
-        { $match: { id : id }},
-        { $group: { _id : '$date', total_time : { $sum : '$time'}}},
+      const {startdate,enddate} = req.body;
+      const getrecord = await Studyrecord.aggregate([
+        { $match: {$or:[{ date: {$gte:new Date(startdate), $lte: new Date(enddate)}}],id }},
+        { $group: { _id : '$datestring', total_typingCnt : { $sum : '$typingCnt'}, total_duration : { $sum : '$duration'}}},
       ]);
       res.json({
         ok: true,
         message: "조회 완료",
         id,
         nickname,
-        gettypingCnt,
-        gettime
+        getrecord
       });
     } catch (error) {
       res.json({
         ok: false,
         message: "조회 실패",
     });
+    console.error(`${error} 에러로 조회 실패`);
   };
 }
 
+const certificate = async (req, res) => {
+  try {
+  const id = res.locals.user.id;
+  const nickname = res.locals.user.nickname;
+  const getcertificate = await Studyrecord.find({ id }).sort("-certificateId");
+
+    res.json({
+      ok:true,
+      message:"조회 완료",
+      id,
+      nickname,
+      getcertificate
+    });
+  } catch (error) {
+    res.json({
+      ok:false,
+      message:"조회 실패"
+    })
+    console.error(`${error} 에러로 조회 실패`);
+  }
+}
+
+const certificatedetail = async (req, res) => {
+  try {
+  const { certificateId } = req.params;
+  const getcertificatedetail = await Studyrecord.findOne({certificateId});
+    res.json({
+      ok:true,
+      message: "조회 성공",
+      getcertificatedetail
+    })
+  } catch (error) {
+    res.json({
+      ok:true,
+      message:"조회 실패"
+    })
+    console.error(`${error} 에러로 조회 실패`);
+  }
+}
 module.exports = {
   idCheck, // 회원가입에서 아이디 중복검사
   nicknameCheck, // 회원가입에서 닉네임 중복검사
@@ -247,5 +294,7 @@ module.exports = {
   updateUserInfo, // 유저 정보 수정
   kakaoCallback, // 카카오 로그인
   studyrecord,
-  mypage 
+  statistic,
+  certificate,
+  certificatedetail 
 };

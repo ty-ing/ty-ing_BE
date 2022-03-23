@@ -5,6 +5,7 @@ const Opendict = require("../models/opendict");
 const postMydict = async (req, res) => {
   try {
     const nickname = res.locals.user.nickname;
+    const id = res.locals.user.id;
     let { scriptId, word } = req.params;
     const { sentence } = req.body;
     word = word.toLowerCase();
@@ -48,6 +49,7 @@ const postMydict = async (req, res) => {
 
     // 나만의 단어장 등록
     await Mydict.create({
+      id,
       nickname,
       scriptId,
       word,

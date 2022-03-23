@@ -5,6 +5,7 @@ const fs = require("fs");
 const postWord = async (req, res) => {
   try {
     const nickname = res.locals.user.nickname;
+    const id = res.locals.user.id;
     let { scriptId, word } = req.params;
     let { meaning } = req.body;
     word = word.toLowerCase();
@@ -71,6 +72,7 @@ const postWord = async (req, res) => {
 
     // 추가
     await Opendict.create({
+      id,
       nickname,
       scriptId,
       word,

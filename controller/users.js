@@ -1,5 +1,7 @@
 const Users = require("../models/users"); // 유저 스키마
 const Studyrecord = require("../models/studyrecord");
+const Opendict = require("../models/opendict")
+const Mydict = require("../models/mydict")
 const jwt = require("jsonwebtoken"); // jwt 토큰 사용
 const Joi = require("joi"); // 유효성 검증 라이브러리
 const bcrypt = require("bcrypt");
@@ -62,6 +64,13 @@ const updateUserInfo = async (req, res) => {
     const { nickname } = await nicknameCheckSchema.validateAsync(req.body); // Joi 유효성 검사
     
     await Users.updateOne({ id },{ $set: { nickname }})
+
+    // 오픈사전 단어장에 등록되어 있는 닉네임 변경
+    await Opendict.updateMany({id}, {$set : {nickname : nickname} })
+
+    // 나만의 단어장에 등록되어 있는 닉네임 변경
+    await Mydict.updateMany({id}, {$set : {nickname : nickname} })
+
     res.status(201).json({ ok: true, message: "수정 완료" });
   } catch (error) {
     res.status(400).json({

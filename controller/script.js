@@ -86,6 +86,8 @@ async function scriptFilter(req, res) {
           throw err
         } else{
         const scripts = await Script.find().sort({_id : 1}).skip(hideScript).limit(8)
+        console.log(page)
+        console.log(hideScript)
         res.json({
           scripts,
           ok: true,

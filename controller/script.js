@@ -29,7 +29,7 @@ async function scriptDetail(req, res) {
       ok: true,
     });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(200).send({
       ok: false,
       errorMessage: "해당 값이 존재하지 않습니다.",
@@ -38,10 +38,11 @@ async function scriptDetail(req, res) {
 }
 
 async function searchScripts(req, res) {
-  const paramWord = req.params; //
-  const targetWord = paramWord.targetWord;
-  const RegWord = new RegExp(targetWord, "gi");
   try {
+    const page = parseInt(req.query.page);
+    const hideScript = (page - 1) * 8;
+    const targetWord = req.query.targetWord;
+    const RegWord = new RegExp(targetWord, "gi");
     const targetScripts = await Script.aggregate([
       { $unwind: "$scriptParagraph" },
       { $match: { scriptParagraph: RegWord } },
@@ -56,17 +57,37 @@ async function searchScripts(req, res) {
           scriptId: { $addToSet: "$scriptId" },
         },
       },
+    ]).sort({ _id: -1 })
+      .skip(hideScript)
+      .limit(8);
+
+    const scriptAmount = await Script.aggregate([
+      { $unwind: "$scriptParagraph" },
+      { $match: { scriptParagraph: RegWord } },
+      {
+        $group: {
+          _id: "$_id",
+          scriptId: { $addToSet: "$scriptId" },
+        },
+      },
+      { $count: "scriptId" },
     ]);
 
-    if (!targetScripts.length) {
+    if (!scriptAmount.length) {
       throw "There is no proper data..";
     }
+
+    const totalScript = scriptAmount[0].scriptId;
+    if (totalScript < hideScript || totalScript == null) {
+      throw "There is no proper data..";
+    }
+
     res.json({
       targetScripts,
       ok: true,
     });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(200).send({
       ok: false,
       errorMessage: "해당 값이 존재하지 않습니다.",
@@ -76,47 +97,64 @@ async function searchScripts(req, res) {
 
 async function scriptFilter(req, res) {
   try {
-    const page = parseInt(req.query.page)
-    const hideScript = ((page - 1) * 8)
+    const page = parseInt(req.query.page);
+    const hideScript = (page - 1) * 8;
     const scriptCategory = req.query.scriptCategory;
     const scriptTopic = req.query.scriptTopic;
     switch (true) {
       case scriptCategory === "all" && scriptTopic === "all": {
-        if (Script.countDocuments < hideScript || Script.countDocuments == null) {
-          throw err
-        } else{
-        const scripts = await Script.find().sort({_id : 1}).skip(hideScript).limit(8)
-        console.log(page)
-        console.log(hideScript)
-        res.json({
-          scripts,
-          ok: true,
-        });
-        break;
-      }
-      }
+        const totalScript = await Script.find().count();
+        if (totalScript < hideScript || totalScript == null) {
+          throw "There is no proper data..";
+        }
+          const scripts = await Script.find()
+            .sort({ _id: -1 })
+            .skip(hideScript)
+            .limit(8);
+          res.json({
+            scripts,
+            ok: true,
+          });
+          break;
+        }
       case scriptTopic === "all" && scriptCategory !== "all": {
         const scriptCategoryList = scriptCategory.split("|");
         const scripts = await Script.find({
           scriptCategory: { $in: scriptCategoryList },
-        });
-        res.json({
-          scripts,
-          ok: true,
-        });
-        break;
-      }
+        }).sort({ _id: -1 })
+        .skip(hideScript)
+        .limit(8);
+        const totalScript = await Script.find({
+          scriptCategory: { $in: scriptCategoryList },
+        }).count();
+        if (totalScript < hideScript || totalScript == null) {
+          throw "There is no proper data..";
+        }
+          res.json({
+            scripts,
+            ok: true,
+          });
+          break;
+        }
       case scriptTopic !== "all" && scriptCategory === "all": {
         const scriptTopicList = scriptTopic.split("|");
         const scripts = await Script.find({
           scriptTopic: { $in: scriptTopicList },
-        });
-        res.json({
-          scripts,
-          ok: true,
-        });
-        break;
-      }
+        }).sort({ _id: -1 })
+        .skip(hideScript)
+        .limit(8);
+        const totalScript = await Script.find({
+          scriptTopic: { $in: scriptTopicList },
+        }).count();
+        if (totalScript < hideScript || totalScript == null) {
+          throw "There is no proper data..";
+        }
+          res.json({
+            scripts,
+            ok: true,
+          });
+          break;
+        }
       case scriptCategory !== "all" && scriptTopic !== "all": {
         const scriptCategoryList = scriptCategory.split("|");
         const scriptTopicList = scriptTopic.split("|");
@@ -129,16 +167,35 @@ async function scriptFilter(req, res) {
               ],
             },
           },
+        ]).sort({ _id: -1 })
+        .skip(hideScript)
+        .limit(8);
+        const scriptAmount = await Script.aggregate([
+          {
+            $match: {
+              $or: [
+                { scriptCategory: { $in: scriptCategoryList } },
+                { scriptTopic: { $in: scriptTopicList } },
+              ],
+            },
+          },
+          { $count: "scriptId" },
         ]);
-        res.json({
-          scripts,
-          ok: true,
-        });
-        break;
+
+        const totalScript = scriptAmount[0].scriptId;
+
+        if (totalScript < hideScript || totalScript == null) {
+          throw "There is no proper data..";
+        }
+          res.json({
+            scripts,
+            ok: true,
+          });
+          break;
+        }
       }
-    }
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(200).send({
       ok: false,
       errorMessage: "해당 값이 존재하지 않습니다.",
@@ -164,7 +221,7 @@ async function findScript(req, res) {
           const script = await Script.aggregate([
             { $match: { scriptType: scriptType } },
             { $sample: { size: 1 } },
-          ]);
+          ])
           res.json({
             script,
             ok: true,
@@ -190,7 +247,7 @@ async function findScript(req, res) {
         break;
     }
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(200).send({
       ok: false,
       errorMessage: "해당 값이 존재하지 않습니다.",

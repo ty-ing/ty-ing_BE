@@ -203,11 +203,11 @@ const kakaoCallback = (req, res, next) => {
 const studyrecord = async (req, res) => {
   try {
     const id = res.locals.user.id;
-    const { scriptId, time, typingCnt, duration } = req.body;
+    const { scriptId, time, typingCnt, duration, progress, speed} = req.body;
     const date = new Date(+new Date() + 3240 * 10000).toISOString();
     const datestring = new Date(+new Date() + 3240 * 10000).toISOString().replace(/\T.*/,'');
   
-    await Studyrecord.create({ id, scriptId, time, typingCnt, date, duration, datestring});
+    await Studyrecord.create({ id, scriptId, time, typingCnt, date, duration, datestring, progress, speed});
     res.json({
       ok: true,
       message: "등록 완료"

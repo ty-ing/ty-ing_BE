@@ -25,15 +25,26 @@ const postWord = async (req, res) => {
     }
 
     // 욕설 필터링
-    const fWords = await fs.promises.readFile(__dirname + "/../fwords/fwords.txt", "utf8") // 옵션 : 인코딩방식(utf8)
+    const fWords = await fs.promises.readFile(
+      __dirname + "/../fwords/fwords.txt",
+      "utf8"
+    ); // 옵션 : 인코딩방식(utf8)
     const isFword = fWords.split("\n").includes(meaning);
 
-    if(isFword) {
-      return res.json({ok : false, errorMessage : "욕설 혹은 올바르지 않은 뜻을 등록하는 경우 건전한 서비스 환경 제공에 어려움이 있으므로 서비스 이용이 제한될 수 있습니다."})
+    if (isFword) {
+      return res.json({
+        ok: false,
+        errorMessage:
+          "욕설 혹은 올바르지 않은 뜻을 등록하는 경우 건전한 서비스 환경 제공에 어려움이 있으므로 서비스 이용이 제한될 수 있습니다.",
+      });
     }
 
     // 유저가 등록한 단어 이미 있는지 찾기
-    const findUserMeaning = await Opendict.findOne({ nickname, scriptId, word });
+    const findUserMeaning = await Opendict.findOne({
+      nickname,
+      scriptId,
+      word,
+    });
 
     // 한 유저당 하나의 단어 뜻만 입력 가능 (여러개 입력 원하면 (ex) 맛있는, 맛이 좋은) 예시와 같이 ,로 단어 넣어야 함.)
     if (findUserMeaning) {
@@ -110,32 +121,8 @@ const getWordForGuest = async (req, res) => {
       return res.json({ ok: false, errorMessage: "등록된 단어가 아닙니다." });
     }
 
-    const findMeanings = await Opendict.aggregate([
-      { $match: { scriptId, word } },
-      {
-        $project: {
-          _id: 0,
-          meaning: 1,
-          nickname: 1,
-          likeCount: 1,
-          dislikeCount: 1,
-          count: 1,
-          wordId: 1,
-        },
-      },
-      { $sort: { count: -1 } },
-      {
-        $project: {
-          count : 0
-        },
-      },
-      {
-        $addFields: {
-          isLike: false,
-          isDislike: false,
-        },
-      },
-    ]);
+    // 오픈사전 단어장 단어 뜻 조회 (게스트 용)
+    const findMeanings = await findGuestMeanings(scriptId, word);
 
     // 조회
     res.json({
@@ -163,50 +150,8 @@ const getWordForUser = async (req, res) => {
       return res.json({ ok: false, errorMessage: "등록된 단어가 아닙니다." });
     }
 
-    // 전체 단어 but 조건 일치 하는 부분만 조회
-    let findMeanings = await Opendict.aggregate([
-      { $match: { scriptId, word } },
-      {
-        $project: {
-          _id: 0,
-          meaning: 1,
-          nickname: 1,
-          likeCount: 1,
-          dislikeCount: 1,
-          count: 1,
-          wordId: 1,
-        },
-      },
-      { $sort: { count: -1 } },
-      {
-        $project: {
-          count: 0,
-        },
-      },
-    ]);
-
-    // 전체 단어 모든 조건 조회
-    const findAllMeanings = await Opendict.aggregate([
-      { $match: { scriptId, word } },
-      { $sort: { count: -1 } },
-    ]);
-
-    // 유저가 like를 했는지 찾아서 모으기
-    const findIsLike = findAllMeanings.map((meaning, idx) => {
-      return meaning.likeList.includes(nickname);
-    });
-
-    // 유저가 dislike를 했는지 찾아서 모으기
-    const findIsDislike = findAllMeanings.map((meaning, idx) => {
-      return meaning.dislikeList.includes(nickname);
-    });
-
-    // isLike, disLike 추가
-    findMeanings.map((meaning, idx) => {
-      meaning.isLike = findIsLike[idx];
-      meaning.isDisLike = findIsDislike[idx];
-      return meaning;
-    });
+    // 오픈사전 단어장 단어 뜻 조회 (로그인 유저용)
+    let findMeanings = await findUserMeanings(scriptId, word, nickname);
 
     // 조회
     res.json({
@@ -287,6 +232,84 @@ const deleteWord = async (req, res) => {
     console.error(`${error} 에러로 단어 뜻 삭제 실패`);
   }
 };
+
+// function : 오픈사전 단어장 단어 뜻 조회 (게스트 용) -> isLike, isDislike가 기본 false
+async function findGuestMeanings(scriptId, word) {
+  return await Opendict.aggregate([
+    { $match: { scriptId, word } },
+    {
+      $project: {
+        _id: 0,
+        meaning: 1,
+        nickname: 1,
+        likeCount: 1,
+        dislikeCount: 1,
+        count: 1,
+        wordId: 1,
+      },
+    },
+    { $sort: { count: -1 } },
+    {
+      $project: {
+        count: 0,
+      },
+    },
+    {
+      $addFields: {
+        isLike: false,
+        isDislike: false,
+      },
+    },
+  ]);
+}
+
+// function : 오픈사전 단어장 단어 뜻 조회 (로그인 유저용)
+async function findUserMeanings(scriptId, word, nickname) {
+  let findMeanings = await Opendict.aggregate([
+    { $match: { scriptId, word } },
+    {
+      $project: {
+        _id: 0,
+        meaning: 1,
+        nickname: 1,
+        likeCount: 1,
+        dislikeCount: 1,
+        count: 1,
+        wordId: 1,
+      },
+    },
+    { $sort: { count: -1 } },
+    {
+      $project: {
+        count: 0,
+      },
+    },
+  ]);
+
+  // 전체 단어 모든 조건 조회
+  const findAllMeanings = await Opendict.aggregate([
+    { $match: { scriptId, word } },
+    { $sort: { count: -1 } },
+  ]);
+
+  // 유저가 like를 했는지 찾아서 모으기
+  const findIsLike = findAllMeanings.map((meaning, idx) => {
+    return meaning.likeList.includes(nickname);
+  });
+
+  // 유저가 dislike를 했는지 찾아서 모으기
+  const findIsDislike = findAllMeanings.map((meaning, idx) => {
+    return meaning.dislikeList.includes(nickname);
+  });
+
+  // isLike, disLike 추가
+  findMeanings.map((meaning, idx) => {
+    meaning.isLike = findIsLike[idx];
+    meaning.isDisLike = findIsDislike[idx];
+    return meaning;
+  });
+  return findMeanings;
+}
 
 module.exports = {
   //오픈사전 단어장

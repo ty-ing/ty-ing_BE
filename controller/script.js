@@ -1,4 +1,3 @@
-const { not } = require("joi");
 const Script = require("../models/script");
 
 //메인화면 랜덤한 스크립트 불러오기
@@ -73,14 +72,13 @@ async function searchScripts(req, res) {
         },
       },
       { $count: "scriptId" },
-    ]);
-
+    ])
     if (!scriptAmount.length) {
       throw "There is no proper data.."
     }
 
     const totalScript = scriptAmount[0].scriptId;
-    if (totalScript < hideScript || totalScript == null) {
+    if (totalScript <= hideScript || totalScript == null) {
       res.json({
         ok:"no"
       })
@@ -108,8 +106,11 @@ async function scriptFilter(req, res) {
     switch (true) {
       case scriptCategory === "all" && scriptTopic === "all": {
         const totalScript = await Script.find().count();
-        if (totalScript < hideScript || totalScript == null) {
-          throw "There is no proper data..";
+        if (totalScript <= hideScript || totalScript == null) {
+          res.json({
+            ok:"no"
+          })
+          break;
         }
           const scripts = await Script.find()
             .sort({ _id: -1 })
@@ -122,7 +123,7 @@ async function scriptFilter(req, res) {
           break;
         }
       case scriptTopic === "all" && scriptCategory !== "all": {
-        const scriptCategoryList = scriptCategory.split("|");
+        const scriptCategoryList = scriptCategory.split("|"); 
         const scripts = await Script.find({
           scriptCategory: { $in: scriptCategoryList },
         }).sort({ _id: -1 })
@@ -131,7 +132,7 @@ async function scriptFilter(req, res) {
         const totalScript = await Script.find({
           scriptCategory: { $in: scriptCategoryList },
         }).count();
-        if (totalScript < hideScript || totalScript == null) {
+        if (totalScript <= hideScript || totalScript == null) {
          res.json({
            ok:"no"
          })
@@ -153,7 +154,7 @@ async function scriptFilter(req, res) {
         const totalScript = await Script.find({
           scriptTopic: { $in: scriptTopicList },
         }).count();
-        if (totalScript < hideScript || totalScript == null) {
+        if (totalScript <= hideScript || totalScript == null) {
           res.json({
             ok:"no"
           })
@@ -194,7 +195,7 @@ async function scriptFilter(req, res) {
 
         const totalScript = scriptAmount[0].scriptId;
 
-        if (totalScript < hideScript || totalScript == null) {
+        if (totalScript <= hideScript || totalScript == null) {
           res.json({
             ok:"no"
           })

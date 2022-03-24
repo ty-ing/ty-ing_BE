@@ -78,7 +78,7 @@ async function searchScripts(req, res) {
     }
 
     const totalScript = scriptAmount[0].scriptId;
-    if (totalScript < hideScript || totalScript == null) {
+    if (totalScript <= hideScript || totalScript == null) {
       res.json({
         ok:"no"
       })
@@ -106,8 +106,11 @@ async function scriptFilter(req, res) {
     switch (true) {
       case scriptCategory === "all" && scriptTopic === "all": {
         const totalScript = await Script.find().count();
-        if (totalScript < hideScript || totalScript == null) {
-          throw "There is no proper data..";
+        if (totalScript <= hideScript || totalScript == null) {
+          res.json({
+            ok:"no"
+          })
+          break;
         }
           const scripts = await Script.find()
             .sort({ _id: -1 })
@@ -129,7 +132,7 @@ async function scriptFilter(req, res) {
         const totalScript = await Script.find({
           scriptCategory: { $in: scriptCategoryList },
         }).count();
-        if (totalScript < hideScript || totalScript == null) {
+        if (totalScript <= hideScript || totalScript == null) {
          res.json({
            ok:"no"
          })
@@ -151,7 +154,7 @@ async function scriptFilter(req, res) {
         const totalScript = await Script.find({
           scriptTopic: { $in: scriptTopicList },
         }).count();
-        if (totalScript < hideScript || totalScript == null) {
+        if (totalScript <= hideScript || totalScript == null) {
           res.json({
             ok:"no"
           })
@@ -192,7 +195,7 @@ async function scriptFilter(req, res) {
 
         const totalScript = scriptAmount[0].scriptId;
 
-        if (totalScript < hideScript || totalScript == null) {
+        if (totalScript <= hideScript || totalScript == null) {
           res.json({
             ok:"no"
           })

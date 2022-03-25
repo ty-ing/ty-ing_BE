@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const connect = () => {
-    mongoose.connect('mongodb://admin:VaJhBS5xmgLLch2y@localhost:27017/admin',
+    mongoose.connect(process.env.MONGO_URL,
     //mongoose.connect('mongodb://localhost:27017/Real-project',
     {
         dbName:"server",

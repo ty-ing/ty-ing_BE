@@ -9,7 +9,7 @@ module.exports = (req, res, next) => {
 
   //인증 Bearer 타입 아니면 거르기
   if (!authToken || authType !== 'Bearer') {
-    res.status(401).send({
+    res.send({
       errorMessage: '로그인 후 이용 가능한 기능입니다.',
     });
     return;
@@ -31,7 +31,7 @@ module.exports = (req, res, next) => {
       });
       return;
     } else {
-    res.status(401).send({
+    res.send({
       ok: false,
       errorMessage: '비정상적인 토큰입니다. 다시 로그인 해주세요',
     });

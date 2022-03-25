@@ -1,4 +1,7 @@
 const Script = require("../models/script");
+const MyScripts = require("../models/myScripts");
+const { func } = require("joi");
+const script = require("../models/script");
 
 //메인화면 랜덤한 스크립트 불러오기
 module.exports.findScript = async (req, res) => {
@@ -23,11 +26,39 @@ module.exports.scriptDetail = async (req, res) => {
 async function scriptDetail(req, res) {
   try {
     const scriptId = req.params;
+    const userId = req.locals.user.userId
     const script = await Script.findOne(scriptId);
-    res.json({
-      script,
-      ok: true,
-    });
+    switch (true) {
+      case (userId): 
+        const checkMyScripts = await MyScripts.findOne({
+          scriptId,
+          userId,
+        })
+        if (checkMyScripts) {
+          res.json({
+            script,
+            ok: true,
+            exist: true,
+          });
+          break;
+        }
+        else {
+          res.json({
+            script,
+            ok: true,
+            exist: false,
+        })
+        break;
+    }
+    case (!userId): {
+      res.json({
+        script,
+        ok: true,
+    })
+    break;
+  }
+}
+   
   } catch (err) {
     console.error(err);
     res.status(200).send({
@@ -40,11 +71,14 @@ async function scriptDetail(req, res) {
   
 async function searchScripts(req, res) {
   try {
+    const userId = res.locals.user.userId
+
     const page = parseInt(req.query.page);
     const hideScript = (page - 1) * 8;
     const targetWord = req.query.targetWord;
     const RegWord = new RegExp(targetWord, "gi");
     const targetScripts = await Script.aggregate([
+     
       { $unwind: "$scriptParagraph" },
       { $match: { scriptParagraph: RegWord } },
       {
@@ -58,6 +92,19 @@ async function searchScripts(req, res) {
           scriptId: { $addToSet: "$scriptId" },
         },
       },
+      {$lookup: {
+        from: "myscripts",
+        localField: "scriptId",
+        foreignField: "scriptId",
+        pipeline :[
+          {$match: {userId: userId}},
+          {
+            $project: {_id: 0, userId: 0, __v: 0}
+          }
+        ],
+        as : "myscript"
+      },
+    },
     ]).sort({ _id: -1 })
       .skip(hideScript)
       .limit(8);
@@ -83,11 +130,11 @@ async function searchScripts(req, res) {
         ok:"no"
       })
     } else {
-      res.json({
-        targetScripts,
-        ok: true,
-      });
-    }   
+            res.json({
+              targetScripts,
+              ok: true,
+            });
+      }
   } catch (err) {
     console.error(err);
     res.status(200).send({

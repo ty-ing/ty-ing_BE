@@ -1,7 +1,7 @@
 const Script = require("../models/script");
 const MyScripts = require("../models/myScripts");
-const { func } = require("joi");
-const script = require("../models/script");
+const AuthMiddleware = require("../middlewares/auth-middleware");
+const { authenticate } = require("passport/lib");
 
 //메인화면 랜덤한 스크립트 불러오기
 module.exports.findScript = async (req, res) => {
@@ -24,41 +24,44 @@ module.exports.scriptDetail = async (req, res) => {
 };
 
 async function scriptDetail(req, res) {
-  try {
-    const scriptId = req.params;
-    const userId = req.locals.user.userId
+  try { 
+    const scriptId = req.params
     const script = await Script.findOne(scriptId);
-    switch (true) {
-      case (userId): 
-        const checkMyScripts = await MyScripts.findOne({
-          scriptId,
-          userId,
-        })
-        if (checkMyScripts) {
-          res.json({
-            script,
-            ok: true,
-            exist: true,
-          });
-          break;
-        }
-        else {
-          res.json({
-            script,
-            ok: true,
-            exist: false,
-        })
-        break;
-    }
-    case (!userId): {
-      res.json({
-        script,
-        ok: true,
+    res.json({
+      script,
+      ok:true
     })
-    break;
-  }
-}
-   
+//     const userId = res.local.user.userId
+//     switch (true) {
+//       case (userId): 
+//         const checkMyScripts = await MyScripts.findOne({
+//           scriptId,
+//           userId,
+//         })
+//         if (checkMyScripts) {
+//           res.json({
+//             script,
+//             ok: true,
+//             exist: true, 
+//           });
+//           break;
+//         }
+//         else {
+//           res.json({
+//             script,
+//             ok: true, 
+//             exist: false,
+//         })
+//         break;
+//     }
+//     case (user === undefined): {
+//       res.json({
+//         script,
+//         ok: true,
+//     })
+//     break;
+//   }
+// }
   } catch (err) {
     console.error(err);
     res.status(200).send({

@@ -55,9 +55,11 @@ const usersRouter = require("./routes/users");
 const opendictWordsRouter = require("./routes/opendict_words");
 const opendictLikeDislikeRouter = require("./routes/opendict_likeDislike");
 const mydictRouter = require("./routes/mydict")
+const myScriptsRouter = require("./routes/myScripts")
 
 
 app.use("/api", [scriptRouter]);
+app.use("/api", [myScriptsRouter])
 app.use("/api", [usersRouter]);
 app.use("/opendict", [opendictWordsRouter]);
 app.use("/likeDislike", [opendictLikeDislikeRouter]);

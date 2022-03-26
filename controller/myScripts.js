@@ -14,15 +14,15 @@ module.exports. showMyScript = async (req, res) => {
 
 async function postMyScript(req, res) {
   const {scriptId} = req.params;
-  const userId = res.locals.user.userId
+  const id = res.locals.user.id
   const checkMyScripts = await MyScripts.findOne({
     scriptId: scriptId,
-    userId: userId,
+    id: id,
   });
   if (!checkMyScripts) {
     await MyScripts.create({
       scriptId,
-      userId,
+      id,
     });
     res.status(200).send({
         ok: true,
@@ -38,10 +38,10 @@ async function postMyScript(req, res) {
 
 async function deleteMyScript(req, res) {
     const { scriptId } = req.params;
-    const userId = res.locals.user.userId
+    const id = res.locals.user.id
     const checkMyScripts = await MyScripts.findOne({
         scriptId: scriptId,
-        userId: userId,
+        id: id,
       });
     if (!checkMyScripts) {
         res.status(200).send({
@@ -51,7 +51,7 @@ async function deleteMyScript(req, res) {
         } else {
             await MyScripts.deleteOne({
                 scriptId: scriptId,
-                userId: userId, 
+                id: id, 
             })
         res.status(200).send({
             ok:true,
@@ -62,15 +62,15 @@ async function deleteMyScript(req, res) {
 
 async function showMyScript(req, res) {
     const { scriptId } = req.params;
-    const userId = res.locals.user.userId
+    const id = res.locals.user.id
     const checkMyScript = await MyScripts.findOne({
         scriptId: scriptId,
-        userId: userId,
+        id: id,
       });
 
       if (checkMyScript) {
-          res.send({exist: true})
+          res.status(200).send({saved: true})
       } else {
-          res.send({exist: false})
+          res.status(200).send({saved: false})
       }
 }   

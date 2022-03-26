@@ -8,8 +8,9 @@ const {
     showMyScript,
 } = require("../controller/myScripts");
 
+router.get("/myScript/:scriptId",authMiddleware, showMyScript);
 router.post("/myScript/:scriptId" ,authMiddleware, postMyScript);
 router.delete("/myScript/:scriptId",authMiddleware, deleteMyScript);
-router.get("/myScript/:scriptId",authMiddleware, showMyScript);
+
 
 module.exports = router;

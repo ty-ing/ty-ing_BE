@@ -298,8 +298,8 @@ module.exports = {
   auth, // 로그인 정보 불러오기 (auth-middleware에 저장된 거)
   updateUserInfo, // 유저 정보 수정
   kakaoCallback, // 카카오 로그인
-  studyrecord,
-  statistic,
-  certificate,
-  certificatedetail 
+  studyrecord, // 스크립트 결과 저장
+  statistic, // 마이페이지(통계)
+  certificate, // 마이페이지(인증서)
+  certificatedetail // 마이페이지(인증서 상세보기)
 };

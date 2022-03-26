@@ -12,7 +12,7 @@ const postScript = require("../migration/insert_Scripts");
 
 router.post("/script", postScript.postScript);
 router.get("/script/:scriptType/:scriptCategory", findScript);
-router.get("/script/list", scriptFilter);
+router.get("/script/list",authMiddleware, scriptFilter);
 router.get("/script/search",authMiddleware, searchScripts);
 router.get("/detail/:scriptId", scriptDetail);
 

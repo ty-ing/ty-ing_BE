@@ -15,14 +15,15 @@ module.exports. showMyScript = async (req, res) => {
 async function postMyScript(req, res) {
   const {scriptId} = req.params;
   const id = res.locals.user.id
+  console.log(scriptId, id)
   const checkMyScripts = await MyScripts.findOne({
     scriptId: scriptId,
-    id: id,
+    userId: id,
   });
   if (!checkMyScripts) {
     await MyScripts.create({
-      scriptId,
-      id,
+    scriptId,
+    userId:id
     });
     res.status(200).send({
         ok: true,
@@ -41,7 +42,7 @@ async function deleteMyScript(req, res) {
     const id = res.locals.user.id
     const checkMyScripts = await MyScripts.findOne({
         scriptId: scriptId,
-        id: id,
+        userId: id,
       });
     if (!checkMyScripts) {
         res.status(200).send({
@@ -51,7 +52,7 @@ async function deleteMyScript(req, res) {
         } else {
             await MyScripts.deleteOne({
                 scriptId: scriptId,
-                id: id, 
+                userId: id, 
             })
         res.status(200).send({
             ok:true,
@@ -65,7 +66,7 @@ async function showMyScript(req, res) {
     const id = res.locals.user.id
     const checkMyScript = await MyScripts.findOne({
         scriptId: scriptId,
-        id: id,
+        userId: id,
       });
 
       if (checkMyScript) {

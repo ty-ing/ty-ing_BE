@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 
 const myScriptsSchema = new mongoose.Schema({
-    userId: Number,
+    userId: String,
     scriptId : Number,
 })
 

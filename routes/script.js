@@ -16,4 +16,5 @@ router.get("/script/list", scriptFilter);
 router.get("/script/search",authMiddleware, searchScripts);
 router.get("/detail/:scriptId", scriptDetail);
 
+
 module.exports = router;

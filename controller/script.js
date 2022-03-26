@@ -1,6 +1,5 @@
 const Script = require("../models/script");
-const MyScripts = require("../models/myScripts");
-const { boolean } = require("joi");
+const {findByCategoryAndTopic} = require("../lib/script/findByCategoryAndTopic")
 
 //메인화면 랜덤한 스크립트 불러오기
 module.exports.findScript = async (req, res) => {
@@ -65,7 +64,7 @@ async function searchScripts(req, res) {
           localField: "scriptId",
           foreignField: "scriptId",
           pipeline: [
-            { $match: { userId: userId } },
+            { $match: { userId: id } },
             {
               $project: { _id: 0, userId: 0, __v: 0 },
             },
@@ -116,117 +115,47 @@ async function searchScripts(req, res) {
 async function scriptFilter(req, res) {
   try {
     const page = parseInt(req.query.page);
-    const hideScript = (page - 1) * 8;
     const scriptCategory = req.query.scriptCategory;
     const scriptTopic = req.query.scriptTopic;
-    switch (true) {
-      case scriptCategory === "all" && scriptTopic === "all": {
-        const totalScript = await Script.find().count();
-        if (totalScript <= hideScript || totalScript == null) {
-          res.json({
-            ok: "no",
-          });
-          break;
-        }
-        const scripts = await Script.find()
-          .sort({ _id: -1 })
-          .skip(hideScript)
-          .limit(8);
-        res.json({
-          scripts,
-          ok: true,
-        });
-        break;
-      }
-      case scriptTopic === "all" && scriptCategory !== "all": {
-        const scriptCategoryList = scriptCategory.split("|");
-        const scripts = await Script.find({
-          scriptCategory: { $in: scriptCategoryList },
-        })
-          .sort({ _id: -1 })
-          .skip(hideScript)
-          .limit(8);
-        const totalScript = await Script.find({
-          scriptCategory: { $in: scriptCategoryList },
-        }).count();
-        if (totalScript <= hideScript || totalScript == null) {
-          res.json({
-            ok: "no",
-          });
-          break;
-        }
-        res.json({
-          scripts,
-          ok: true,
-        });
-        break;
-      }
-      case scriptTopic !== "all" && scriptCategory === "all": {
-        const scriptTopicList = scriptTopic.split("|");
-        const scripts = await Script.find({
-          scriptTopic: { $in: scriptTopicList },
-        })
-          .sort({ _id: -1 })
-          .skip(hideScript)
-          .limit(8);
-        const totalScript = await Script.find({
-          scriptTopic: { $in: scriptTopicList },
-        }).count();
-        if (totalScript <= hideScript || totalScript == null) {
-          res.json({
-            ok: "no",
-          });
-          break;
-        }
-        res.json({
-          scripts,
-          ok: true,
-        });
-        break;
-      }
-      case scriptCategory !== "all" && scriptTopic !== "all": {
-        const scriptCategoryList = scriptCategory.split("|");
-        const scriptTopicList = scriptTopic.split("|");
-        const scripts = await Script.aggregate([
-          {
-            $match: {
-              $or: [
-                { scriptCategory: { $in: scriptCategoryList } },
-                { scriptTopic: { $in: scriptTopicList } },
-              ],
-            },
-          },
-        ])
-          .sort({ _id: -1 })
-          .skip(hideScript)
-          .limit(8);
-        const scriptAmount = await Script.aggregate([
-          {
-            $match: {
-              $or: [
-                { scriptCategory: { $in: scriptCategoryList } },
-                { scriptTopic: { $in: scriptTopicList } },  
-              ],
-            },
-          },
-          { $count: "scriptId" },
-        ]);
+    const isMyScript = req.query.myscript;
+    const userId = res.locals.user.id;
+    const perPage = 8
+    const hideScript = (page - 1) * perPage;
 
-        const totalScript = scriptAmount[0].scriptId;
+    const scripts =  await findByCategoryAndTopic({
+      scriptCategory,
+      scriptTopic,
+      isMyScript,
+      userId,
+      additionalStage: [
+        {$sort : { _id: -1 }},
+        {$skip : hideScript},
+        {$limit : perPage},
+      ]
+    })
+  
+    const scriptAmount = await findByCategoryAndTopic({
+      scriptCategory,
+      scriptTopic,
+      isMyScript,
+      userId,
+      additionalStage: [{$count : "scriptId"}]
+    })
 
-        if (totalScript <= hideScript || totalScript == null) {
-          res.json({
-            ok: "no",
-          });
-          break;
-        }
-        res.json({
-          scripts,
-          ok: true,
-        });
-        break;
-      }
+    const totalScript = scriptAmount[0].scriptId
+
+    if (totalScript <= hideScript || totalScript == null) {
+      res.json({
+        ok: "no",
+      });
+      return;
     }
+
+    res.json({
+      scripts,
+      ok: true,
+    });
+
   } catch (err) {
     console.error(err);
     res.status(200).send({

@@ -42,6 +42,7 @@ async function searchScripts(req, res) {
   try {
     const page = parseInt(req.query.page);
     const hideScript = (page - 1) * 8;
+    const userId = res.locals.user.userId;
     const targetWord = req.query.targetWord;
     const RegWord = new RegExp(targetWord, "gi");
     const targetScripts = await Script.aggregate([
@@ -64,7 +65,7 @@ async function searchScripts(req, res) {
           localField: "scriptId",
           foreignField: "scriptId",
           pipeline: [
-            { $match: { userId: id } },
+            { $match: { userId: userId } },
             {
               $project: { _id: 0, userId: 0, __v: 0 },
             },
@@ -153,7 +154,7 @@ async function scriptFilter(req, res) {
 
     res.json({
       scripts,
-      ok: true,
+      ok: true, 
     });
 
   } catch (err) {

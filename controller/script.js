@@ -1,7 +1,6 @@
 const Script = require("../models/script");
 const MyScripts = require("../models/myScripts");
-const AuthMiddleware = require("../middlewares/auth-middleware");
-const { authenticate } = require("passport/lib");
+const { boolean } = require("joi");
 
 //메인화면 랜덤한 스크립트 불러오기
 module.exports.findScript = async (req, res) => {
@@ -24,44 +23,13 @@ module.exports.scriptDetail = async (req, res) => {
 };
 
 async function scriptDetail(req, res) {
-  try { 
-    const scriptId = req.params
+  try {
+    const scriptId = req.params;
     const script = await Script.findOne(scriptId);
     res.json({
       script,
-      ok:true
-    })
-//     const userId = res.local.user.userId
-//     switch (true) {
-//       case (userId): 
-//         const checkMyScripts = await MyScripts.findOne({
-//           scriptId,
-//           userId,
-//         })
-//         if (checkMyScripts) {
-//           res.json({
-//             script,
-//             ok: true,
-//             exist: true, 
-//           });
-//           break;
-//         }
-//         else {
-//           res.json({
-//             script,
-//             ok: true, 
-//             exist: false,
-//         })
-//         break;
-//     }
-//     case (user === undefined): {
-//       res.json({
-//         script,
-//         ok: true,
-//     })
-//     break;
-//   }
-// }
+      ok: true,
+    });
   } catch (err) {
     console.error(err);
     res.status(200).send({
@@ -71,17 +39,13 @@ async function scriptDetail(req, res) {
   }
 }
 
-  
 async function searchScripts(req, res) {
   try {
-    const userId = res.locals.user.userId
-
     const page = parseInt(req.query.page);
     const hideScript = (page - 1) * 8;
     const targetWord = req.query.targetWord;
     const RegWord = new RegExp(targetWord, "gi");
     const targetScripts = await Script.aggregate([
-     
       { $unwind: "$scriptParagraph" },
       { $match: { scriptParagraph: RegWord } },
       {
@@ -95,20 +59,22 @@ async function searchScripts(req, res) {
           scriptId: { $addToSet: "$scriptId" },
         },
       },
-      {$lookup: {
-        from: "myscripts",
-        localField: "scriptId",
-        foreignField: "scriptId",
-        pipeline :[
-          {$match: {userId: userId}},
-          {
-            $project: {_id: 0, userId: 0, __v: 0}
-          }
-        ],
-        as : "myscript"
+      {
+        $lookup: {
+          from: "myscripts",
+          localField: "scriptId",
+          foreignField: "scriptId",
+          pipeline: [
+            { $match: { userId: userId } },
+            {
+              $project: { _id: 0, userId: 0, __v: 0 },
+            },
+          ],
+          as: "myscript",
+        },
       },
-    },
-    ]).sort({ _id: -1 })
+    ])
+      .sort({ _id: -1 })
       .skip(hideScript)
       .limit(8);
 
@@ -122,22 +88,22 @@ async function searchScripts(req, res) {
         },
       },
       { $count: "scriptId" },
-    ])
+    ]);
     if (!scriptAmount.length) {
-      throw "There is no proper data.."
+      throw "There is no proper data..";
     }
 
     const totalScript = scriptAmount[0].scriptId;
     if (totalScript <= hideScript || totalScript == null) {
       res.json({
-        ok:"no"
-      })
+        ok: "no",
+      });
     } else {
-            res.json({
-              targetScripts,
-              ok: true,
-            });
-      }
+      res.json({
+        targetScripts,
+        ok: true,
+      });
+    }
   } catch (err) {
     console.error(err);
     res.status(200).send({
@@ -158,64 +124,66 @@ async function scriptFilter(req, res) {
         const totalScript = await Script.find().count();
         if (totalScript <= hideScript || totalScript == null) {
           res.json({
-            ok:"no"
-          })
-          break;
-        }
-          const scripts = await Script.find()
-            .sort({ _id: -1 })
-            .skip(hideScript)
-            .limit(8);
-          res.json({
-            scripts,
-            ok: true,
+            ok: "no",
           });
           break;
         }
+        const scripts = await Script.find()
+          .sort({ _id: -1 })
+          .skip(hideScript)
+          .limit(8);
+        res.json({
+          scripts,
+          ok: true,
+        });
+        break;
+      }
       case scriptTopic === "all" && scriptCategory !== "all": {
-        const scriptCategoryList = scriptCategory.split("|"); 
+        const scriptCategoryList = scriptCategory.split("|");
         const scripts = await Script.find({
           scriptCategory: { $in: scriptCategoryList },
-        }).sort({ _id: -1 })
-        .skip(hideScript)
-        .limit(8);
+        })
+          .sort({ _id: -1 })
+          .skip(hideScript)
+          .limit(8);
         const totalScript = await Script.find({
           scriptCategory: { $in: scriptCategoryList },
         }).count();
         if (totalScript <= hideScript || totalScript == null) {
-         res.json({
-           ok:"no"
-         })
-         break;
-        }
           res.json({
-            scripts,
-            ok: true,
+            ok: "no",
           });
           break;
         }
+        res.json({
+          scripts,
+          ok: true,
+        });
+        break;
+      }
       case scriptTopic !== "all" && scriptCategory === "all": {
         const scriptTopicList = scriptTopic.split("|");
         const scripts = await Script.find({
           scriptTopic: { $in: scriptTopicList },
-        }).sort({ _id: -1 })
-        .skip(hideScript)
-        .limit(8);
+        })
+          .sort({ _id: -1 })
+          .skip(hideScript)
+          .limit(8);
         const totalScript = await Script.find({
           scriptTopic: { $in: scriptTopicList },
         }).count();
         if (totalScript <= hideScript || totalScript == null) {
           res.json({
-            ok:"no"
-          })
-          break;
-        }
-          res.json({
-            scripts,
-            ok: true,
+            ok: "no",
           });
           break;
         }
+        res.json({
+          scripts,
+          ok: true,
+        });
+        break;
+      }
       case scriptCategory !== "all" && scriptTopic !== "all": {
         const scriptCategoryList = scriptCategory.split("|");
         const scriptTopicList = scriptTopic.split("|");
@@ -228,15 +196,16 @@ async function scriptFilter(req, res) {
               ],
             },
           },
-        ]).sort({ _id: -1 })
-        .skip(hideScript)
-        .limit(8);
+        ])
+          .sort({ _id: -1 })
+          .skip(hideScript)
+          .limit(8);
         const scriptAmount = await Script.aggregate([
           {
             $match: {
               $or: [
                 { scriptCategory: { $in: scriptCategoryList } },
-                { scriptTopic: { $in: scriptTopicList } },
+                { scriptTopic: { $in: scriptTopicList } },  
               ],
             },
           },
@@ -247,17 +216,17 @@ async function scriptFilter(req, res) {
 
         if (totalScript <= hideScript || totalScript == null) {
           res.json({
-            ok:"no"
-          })
-          break;
-        }
-          res.json({
-            scripts,
-            ok: true,
+            ok: "no",
           });
           break;
         }
+        res.json({
+          scripts,
+          ok: true,
+        });
+        break;
       }
+    }
   } catch (err) {
     console.error(err);
     res.status(200).send({
@@ -285,7 +254,7 @@ async function findScript(req, res) {
           const script = await Script.aggregate([
             { $match: { scriptType: scriptType } },
             { $sample: { size: 1 } },
-          ])
+          ]);
           res.json({
             script,
             ok: true,

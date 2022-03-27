@@ -1,5 +1,7 @@
 const Script = require("../models/script");
-const {findByCategoryAndTopic} = require("../lib/script/findByCategoryAndTopic")
+const {
+  findByCategoryAndTopic,
+} = require("../lib/script/findByCategoryAndTopic");
 
 //메인화면 랜덤한 스크립트 불러오기
 module.exports.findScript = async (req, res) => {
@@ -120,30 +122,35 @@ async function scriptFilter(req, res) {
     const scriptTopic = req.query.scriptTopic;
     const isMyScript = req.query.myscript;
     const userId = res.locals.user.id;
-    const perPage = 8
+    const perPage = 8;
     const hideScript = (page - 1) * perPage;
 
-    const scripts =  await findByCategoryAndTopic({
+    const scripts = await findByCategoryAndTopic({
       scriptCategory,
       scriptTopic,
       isMyScript,
       userId,
       additionalStage: [
-        {$sort : { _id: -1 }},
-        {$skip : hideScript},
-        {$limit : perPage},
-      ]
-    })
-  
+        { $sort: { _id: -1 } },
+        { $skip: hideScript },
+        { $limit: perPage },
+      ],
+    });
+
     const scriptAmount = await findByCategoryAndTopic({
       scriptCategory,
       scriptTopic,
       isMyScript,
       userId,
-      additionalStage: [{$count : "scriptId"}]
-    })
+      additionalStage: [{ $count: "scriptId" }],
+    });
+    
 
-    const totalScript = scriptAmount[0].scriptId
+    if (scriptAmount[0]){
+      totalScript = scriptAmount[0].scriptId;
+    } else {
+      totalScript = 0;
+    }
 
     if (totalScript <= hideScript || totalScript == null) {
       res.json({
@@ -154,9 +161,8 @@ async function scriptFilter(req, res) {
 
     res.json({
       scripts,
-      ok: true, 
+      ok: true,
     });
-
   } catch (err) {
     console.error(err);
     res.status(200).send({

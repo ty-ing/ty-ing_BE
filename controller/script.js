@@ -144,12 +144,16 @@ async function scriptFilter(req, res) {
       userId,
       additionalStage: [{ $count: "scriptId" }],
     });
-    
+
 
     if (scriptAmount[0]){
       totalScript = scriptAmount[0].scriptId;
     } else {
       totalScript = 0;
+    }
+
+    if (totalScript === 0) {
+      throw "값이 존재하지 않습니다."
     }
 
     if (totalScript <= hideScript || totalScript == null) {

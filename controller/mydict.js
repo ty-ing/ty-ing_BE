@@ -270,8 +270,8 @@ async function getMydictMeanings(req, res) {
   let mydictMeanings = [];
 
   // 나만의 단어장에 좋아요 1위 단어 넣기
-  for (let mydictMeaning2 of findMostLikedMeaning) {
-    let mostLikedMeaning = mydictMeaning2.meaning;
+  for (let mydictMeaning of findMostLikedMeaning) {
+    let mostLikedMeaning = mydictMeaning.meaning;
     mydictMeanings.push(mostLikedMeaning);
   }
 

@@ -169,30 +169,129 @@ async function getMydictMeanings(req, res) {
     { $project: { _id: 0, nickname: 1, scriptId: 1, word: 1, sentence: 1 } },
   ]);
 
-  // 오픈사전 단어장에서 좋아요 1위 단어 뜻 가져오기 -> 나만의 단어장 단어 뜻으로 저장
-  let mydictMeanings = [];
-  for (let mydictWord of findMydictWords) {
-    const findOpendictMeaning = await findMostLikedMeaning(mydictWord);
+  // 나만의 단어장에 등록된 단어로 오픈사전 단어장에서 좋아요 1위 단어 찾기
+  const findMostLikedMeaning = await Mydict.aggregate([
+    { $match: { nickname } },
+    {
+      $lookup: {
+        from: "opendicts",
+        localField: "word",
+        foreignField: "word",
+        let: { scriptId: "$scriptId" },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $in: ["$scriptId", ["$$scriptId"]] },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              word: 1,
+              meaning: 1,
+              count: 1,
+              nickname: 1,
+              scriptId: 1,
+            },
+          },
+          {
+            $sort: { count: -1 },
+          },
+          {
+            $group: {
+              _id: "$word",
+              meaning: { $first: "$meaning" },
+            },
+          },
+        ],
+        as: "meaning",
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        meaning: 1,
+      },
+    },
+  ]);
 
-    mydictMeanings.push(findOpendictMeaning);
+  // 나만의 단어장에 등록된 단어로 오픈사전 단어장에서 내가 등록한 단어 찾기
+  const findMydictWord = await Mydict.aggregate([
+    { $match: { nickname } },
+    {
+      $lookup: {
+        from: "opendicts",
+        localField: "word",
+        foreignField: "word",
+        let: { scriptId: "$scriptId", nickname: "$nickname" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $in: ["$scriptId", ["$$scriptId"]] },
+                  { $in: ["$nickname", ["$$nickname"]] },
+                ],
+              },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              word: 1,
+              meaning: 1,
+              count: 1,
+              nickname: 1,
+              scriptId: 1,
+            },
+          },
+          {
+            $sort: { count: -1 },
+          },
+          {
+            $group: {
+              _id: "$word",
+              meaning: { $first: "$meaning" },
+            },
+          },
+        ],
+        as: "meaning",
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        meaning: 1,
+      },
+    },
+  ]);
+
+  // 나만의 단어장에 찾은 단어 넣는 곳
+  let mydictMeanings = [];
+
+  // 나만의 단어장에 좋아요 1위 단어 넣기
+  for (let mydictMeaning of findMostLikedMeaning) {
+    let mostLikedMeaning = mydictMeaning.meaning;
+    mydictMeanings.push(mostLikedMeaning);
   }
 
-  // 오픈사전 단어장에서 내가 등록한 단어 뜻 찾아오기 -> 나만의 단어장 단어 뜻으로 저장
+  // 나만의 단어장에 내가 저장한 단어 넣기
   let idx = 0;
-  for (let mydictWord of findMydictWords) {
-    let findOpendictMeaning = await findMyMeaning(mydictWord, nickname);
+  for (let mydictMeaning2 of findMydictWord) {
+    let myMeaning = mydictMeaning2.meaning;
 
+    // 프론트로 정제해서 보내기
     // 내가 등록한 단어 뜻이 없을 때 빈 칸으로 넣어줌
-    if (findOpendictMeaning.length === 0) {
-      findOpendictMeaning = [{ meaning: "" }];
+    if (myMeaning.length === 0) {
+      myMeaning = [{ meaning: "" }];
     }
 
-    // 좋아요 1위 단어 뜻 옆에 넣기 (아까 찾아서 나만의 단어장 뜻에 추가해 놓았었음)
+    // 좋아요 1위 단어 뜻 옆에 넣기
     mydictMeanings[idx].push(
-      ...findOpendictMeaning,
-      mydictWord.word,
-      mydictWord.sentence,
-      mydictWord.scriptId
+      ...myMeaning,
+      findMydictWords[idx].word,
+      findMydictWords[idx].sentence,
+      findMydictWords[idx].scriptId
     );
 
     // 객체 분리해서 넣어주기
@@ -203,57 +302,7 @@ async function getMydictMeanings(req, res) {
 
     idx++;
   }
-
   return mydictMeanings;
-}
-
-// function : 오픈사전 단어장에서 좋아요 1위 단어 뜻 찾아오기
-async function findMostLikedMeaning(mydict) {
-  return await Opendict.aggregate([
-    {
-      $match: {
-        scriptId: mydict.scriptId,
-        word: mydict.word,
-      },
-    },
-    {
-      $project: {
-        _id: 0,
-        nickname: 1,
-        word: 1,
-        meaning: 1,
-        count: 1,
-      },
-    },
-    { $sort: { count: -1 } },
-    {
-      $group: {
-        _id: "$word",
-        meaning: { $first: "$meaning" },
-      },
-    },
-  ]);
-}
-
-// function : 오픈사전 단어장에서 내가 등록한 단어 뜻 찾아오기
-async function findMyMeaning(mydict, nickname) {
-  return await Opendict.aggregate([
-    { $match: { scriptId: mydict.scriptId, word: mydict.word, nickname } },
-    {
-      $project: {
-        _id: 0,
-        nickname: 1,
-        word: 1,
-        meaning: 1,
-      },
-    },
-    {
-      $group: {
-        _id: "$word",
-        meaning: { $first: "$meaning" },
-      },
-    },
-  ]);
 }
 
 module.exports = {

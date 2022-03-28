@@ -1,7 +1,7 @@
 const Script = require("../models/script");
-const {
-  findByCategoryAndTopic,
-} = require("../lib/script/findByCategoryAndTopic");
+
+const { findByCategoryAndTopic, } = require("../lib/script/findByCategoryAndTopic");
+const {findByCategoryAndType} = require("../lib/script/findByCategoryAndType"); 
 
 //메인화면 랜덤한 스크립트 불러오기
 module.exports.findScript = async (req, res) => {
@@ -72,7 +72,7 @@ async function searchScripts(req, res) {
               $project: { _id: 0, userId: 0, __v: 0 },
             },
           ],
-          as: "myscript",
+          as: "scripts",
         },
       },
     ])
@@ -179,46 +179,16 @@ async function scriptFilter(req, res) {
 async function findScript(req, res) {
   try {
     const { scriptType, scriptCategory } = req.params;
-    switch (true) {
-      case scriptType === "all" && scriptCategory === "all":
-        {
-          const script = await Script.aggregate([{ $sample: { size: 1 } }]);
-          res.json({
-            script,
-            ok: true,
-          });
-        }
-        break;
-      case scriptCategory === "all" && scriptType !== "all":
-        {
-          const script = await Script.aggregate([
-            { $match: { scriptType: scriptType } },
-            { $sample: { size: 1 } },
-          ]);
-          res.json({
-            script,
-            ok: true,
-          });
-        }
-        break;
-      case scriptCategory !== "all" && scriptType !== "all":
-        {
-          const script = await Script.aggregate([
-            {
-              $match: {
-                scriptType: scriptType,
-                scriptCategory: scriptCategory,
-              },
-            },
-            { $sample: { size: 1 } },
-          ]);
-          res.json({
-            script,
-            ok: true,
-          });
-        }
-        break;
-    }
+
+    const  script = await findByCategoryAndType({
+      scriptCategory,
+      scriptType,
+    })
+   
+    res.json({
+      script,
+      ok:true,
+    })
   } catch (err) {
     console.error(err);
     res.status(200).send({

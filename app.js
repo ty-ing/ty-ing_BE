@@ -33,8 +33,8 @@ const cors = require("cors");
 app.use(cors());
 passportConfig();
 
-app.use(helmet());
-app.use(hpp());
+// app.use(helmet());
+// app.use(hpp());
 
 //Request 로그 남기는 미들웨어
 const requestMiddleware = (req, res, next) => {

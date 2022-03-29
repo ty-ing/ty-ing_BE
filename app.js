@@ -11,24 +11,24 @@ connect();
 
 const cors = require("cors");
 
-// const whitelist = ["http://localhost:3000"];
-// const corsOptions = {
-//   origin: function (origin, callback) {
-//     if (whitelist.indexOf(origin) !== -1) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error("Not Allowed Origin!"));
-//     }
-//   },
-// }; 
-// app.use(cors(corsOptions));
+const whitelist = ["https://ty-ing.com/"];
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not Allowed Origin!"));
+    }
+  },
+}; 
+app.use(cors(corsOptions));
 
-const corsOption = {
-  origin: "https://ty-ing.com/",
-  // credentials: true,
-};
+// const corsOption = {
+//   origin: "https://ty-ing.com/",
+//   credentials: true,
+// };
 
-app.use(cors(corsOption));
+// app.use(cors(corsOption));
 
 // app.use(cors());
 passportConfig();

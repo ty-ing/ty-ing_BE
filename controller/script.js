@@ -18,7 +18,7 @@ module.exports.searchScripts = async (req, res) => {
   await searchScripts(req, res);
 };
 
-//스크립트 상세페이지.
+//스크립트 상세페이지
 module.exports.scriptDetail = async (req, res) => {
   await scriptDetail(req, res);
 };

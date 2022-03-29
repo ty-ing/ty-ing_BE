@@ -186,6 +186,21 @@ const putWord = async (req, res) => {
       });
     }
 
+    // 욕설 필터링
+    const fWords = await fs.promises.readFile(
+      __dirname + "/../fwords/fwords.txt",
+      "utf8"
+    ); // 옵션 : 인코딩방식(utf8)
+    const isFword = fWords.split("\n").includes(meaning);
+
+    if (isFword) {
+      return res.json({
+        ok: false,
+        errorMessage:
+          "욕설 혹은 올바르지 않은 뜻을 등록하는 경우 건전한 서비스 환경 제공에 어려움이 있으므로 서비스 이용이 제한될 수 있습니다.",
+      });
+    }
+
     // 전체 단어 검색해서 현재 수정하려고 하는 뜻과 비교 후 이미 있는 단어 뜻일 경우 수정 불가
     let meaningList = []; // JSON 해체 후 meaning만 뽑아내서 리스트 만들기
     for (let findMeaning of findMeanings) {

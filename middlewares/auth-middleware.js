@@ -4,7 +4,6 @@ const Users = require('../models/users');
 // 인증
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
-  console.log(authorization)
   const [authType, authToken] = (authorization || '').split(' ');
 
   //인증 Bearer 타입 아니면 거르기

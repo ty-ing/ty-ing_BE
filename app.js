@@ -30,16 +30,7 @@ const cors = require("cors");
 
 // app.use(cors(corsOption));
 
-
-const corsOptions = {
-  origin: ["https://ty-ing.com/", "http://localhost:3000"],
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
-
-
-// app.use(cors());
+app.use(cors());
 passportConfig();
 
 app.use(helmet());

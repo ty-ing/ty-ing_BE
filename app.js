@@ -25,7 +25,7 @@ const cors = require("cors");
 
 const corsOption = {
   origin: "https://ty-ing.com/",
-  credentials: true,
+  // credentials: true,
 };
 
 app.use(cors(corsOption));

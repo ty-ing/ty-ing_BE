@@ -76,6 +76,12 @@ app.use("/mydict", [mydictRouter]);
 app.get("/admin", (req, res) => {
   res.render("insert_Scripts.html");
 });
+
+// 상태검사용
+app.get("/", (req, res) => {
+  res.send("...")
+})
+
 app.listen(port, () => {
   console.log(`listening at http://localhost:${port}`);
 });

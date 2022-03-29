@@ -35,70 +35,70 @@ const postWord = async (req, res) => {
       });
     }
 
-    // // 유저가 등록한 단어 이미 있는지 찾기
-    // const findUserMeaning = await Opendict.findOne({
-    //   nickname,
-    //   scriptId,
-    //   word,
-    // });
+    // 유저가 등록한 단어 이미 있는지 찾기
+    const findUserMeaning = await Opendict.findOne({
+      nickname,
+      scriptId,
+      word,
+    });
 
-    // // 한 유저당 하나의 단어 뜻만 입력 가능 (여러개 입력 원하면 (ex) 맛있는, 맛이 좋은) 예시와 같이 ,로 단어 넣어야 함.)
-    // if (findUserMeaning) {
-    //   return res.json({
-    //     ok: false,
-    //     errorMessage: "이미 단어 뜻을 등록하셨습니다.",
-    //   });
-    // }
+    // 한 유저당 하나의 단어 뜻만 입력 가능 (여러개 입력 원하면 (ex) 맛있는, 맛이 좋은) 예시와 같이 ,로 단어 넣어야 함.)
+    if (findUserMeaning) {
+      return res.json({
+        ok: false,
+        errorMessage: "이미 단어 뜻을 등록하셨습니다.",
+      });
+    }
 
-    // // 이미 있는 단어 뜻일 경우 입력 불가
-    // // 단어 뜻 전체 검색
-    // const findMeanings = await Opendict.aggregate([
-    //   { $match: { scriptId, word } },
-    //   { $project: { _id: 0, meaning: 1 } },
-    // ]);
+    // 이미 있는 단어 뜻일 경우 입력 불가
+    // 단어 뜻 전체 검색
+    const findMeanings = await Opendict.aggregate([
+      { $match: { scriptId, word } },
+      { $project: { _id: 0, meaning: 1 } },
+    ]);
 
-    // let meaningList = []; // JSON 해체 후 meaning만 뽑아내서 리스트 만들기
-    // for (let findMeaning of findMeanings) {
-    //   meaningList.push(findMeaning.meaning);
-    // }
+    let meaningList = []; // JSON 해체 후 meaning만 뽑아내서 리스트 만들기
+    for (let findMeaning of findMeanings) {
+      meaningList.push(findMeaning.meaning);
+    }
 
-    // if (meaningList.includes(meaning)) {
-    //   return res.json({ ok: false, errorMessage: "이미 있는 단어 뜻 입니다." });
-    // }
+    if (meaningList.includes(meaning)) {
+      return res.json({ ok: false, errorMessage: "이미 있는 단어 뜻 입니다." });
+    }
 
-    // // 단어 뜻 20자리 이하만 입력 가능
-    // const regex = /^.{1,20}$/; // 영,한 상관없이 20자리
-    // // const regex = /^[ㄱ-ㅎㅏ-ㅣ가-힣\s]{1,20}$/; // 공백 가능, 한글만 10자리까지
+    // 단어 뜻 20자리 이하만 입력 가능
+    const regex = /^.{1,20}$/; // 영,한 상관없이 20자리
+    // const regex = /^[ㄱ-ㅎㅏ-ㅣ가-힣\s]{1,20}$/; // 공백 가능, 한글만 10자리까지
 
-    // if (!regex.test(meaning)) {
-    //   return res.json({
-    //     ok: false,
-    //     errorMessage: "단어 뜻을 20자 이내로 입력하세요",
-    //   });
-    // }
+    if (!regex.test(meaning)) {
+      return res.json({
+        ok: false,
+        errorMessage: "단어 뜻을 20자 이내로 입력하세요",
+      });
+    }
 
-    // // 추가
-    // await Opendict.create({
-    //   id,
-    //   nickname,
-    //   scriptId,
-    //   word,
-    //   meaning,
-    //   likeList,
-    //   dislikeList,
-    //   likeCount,
-    //   dislikeCount,
-    //   count,
-    // });
+    // 추가
+    await Opendict.create({
+      id,
+      nickname,
+      scriptId,
+      word,
+      meaning,
+      likeList,
+      dislikeList,
+      likeCount,
+      dislikeCount,
+      count,
+    });
 
-    // // 추가된 단어 뜻 wordId 같이 보내주기
-    // const findAddedWord = await Opendict.findOne({ nickname, scriptId, word });
+    // 추가된 단어 뜻 wordId 같이 보내주기
+    const findAddedWord = await Opendict.findOne({ nickname, scriptId, word });
 
-    // res.json({
-    //   ok: true,
-    //   message: "단어 뜻 추가 성공",
-    //   wordId: findAddedWord.wordId,
-    // });
+    res.json({
+      ok: true,
+      message: "단어 뜻 추가 성공",
+      wordId: findAddedWord.wordId,
+    });
   } catch (error) {
     res.json({ ok: false, errorMessage: "단어 뜻 추가 실패" });
     console.error(`${error} 에러로 단어 뜻 추가 실패`);

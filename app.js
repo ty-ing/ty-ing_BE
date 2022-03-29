@@ -78,8 +78,8 @@ app.get("/admin", (req, res) => {
 });
 
 // 상태검사용
-app.get("/", (req, res) => {
-  res.send("...")
+app.get("/statusCheck", (req, res) => {
+  res.send("healthy")
 })
 
 app.listen(port, () => {

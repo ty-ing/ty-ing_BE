@@ -13,7 +13,7 @@ module.exports.scriptFilter = async (req, res) => {
   await scriptFilter(req, res);
 };
 
-//스크립트 검색.
+//스크립트 검색
 module.exports.searchScripts = async (req, res) => {
   await searchScripts(req, res);
 };

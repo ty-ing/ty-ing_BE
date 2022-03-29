@@ -3,6 +3,8 @@ const passportConfig = require("./passport");
 const express = require("express");
 const app = express();
 const port = 3000;
+const helmet = require("helmet");
+const hpp = require("hpp");
 
 const connect = require("./models");
 connect();
@@ -25,8 +27,8 @@ const cors = require("cors");
 app.use(cors());
 passportConfig();
 
-// const helmet = require("helmet");
-// app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(hpp());
 
 //Request 로그 남기는 미들웨어
 const requestMiddleware = (req, res, next) => {

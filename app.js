@@ -3,13 +3,15 @@ const passportConfig = require("./passport");
 const express = require("express");
 const app = express();
 const port = 3000;
+const helmet = require("helmet");
+const hpp = require("hpp");
 
 const connect = require("./models");
 connect();
 
 const cors = require("cors");
 
-// const whitelist = ["http://localhost:3000"];
+// const whitelist = ["https://ty-ing.com/"];
 // const corsOptions = {
 //   origin: function (origin, callback) {
 //     if (whitelist.indexOf(origin) !== -1) {
@@ -21,12 +23,18 @@ const cors = require("cors");
 // }; 
 // app.use(cors(corsOptions));
 
+// const corsOption = {
+//   origin: "https://ty-ing.com/",
+//   credentials: true,
+// };
+
+// app.use(cors(corsOption));
 
 app.use(cors());
 passportConfig();
 
-// const helmet = require("helmet");
-// app.use(helmet());
+app.use(helmet());
+app.use(hpp());
 
 //Request 로그 남기는 미들웨어
 const requestMiddleware = (req, res, next) => {

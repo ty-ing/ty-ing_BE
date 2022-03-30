@@ -1,5 +1,5 @@
 const Opendict = require("../models/opendict"); // 오픈사전 단어장 스키마
-const fs = require("fs");
+const {fWordsFilter} = require("../lib/opendict/fwordsFillter"); // 욕설 필터링
 
 // 단어 뜻 추가
 const postWord = async (req, res) => {
@@ -25,11 +25,7 @@ const postWord = async (req, res) => {
     }
 
     // 욕설 필터링
-    const fWords = await fs.promises.readFile(
-      __dirname + "/../fwords/fwords.txt",
-      "utf8"
-    ); // 옵션 : 인코딩방식(utf8)
-    const isFword = fWords.split("\n").includes(meaning);
+    const isFword = await fWordsFilter(meaning);
 
     if (isFword) {
       return res.json({
@@ -187,11 +183,7 @@ const putWord = async (req, res) => {
     }
 
     // 욕설 필터링
-    const fWords = await fs.promises.readFile(
-      __dirname + "/../fwords/fwords.txt",
-      "utf8"
-    ); // 옵션 : 인코딩방식(utf8)
-    const isFword = fWords.split("\n").includes(meaning);
+    const isFword = await fWordsFilter(meaning);
 
     if (isFword) {
       return res.json({

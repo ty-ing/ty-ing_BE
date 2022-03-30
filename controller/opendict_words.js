@@ -1,5 +1,5 @@
 const Opendict = require("../models/opendict"); // 오픈사전 단어장 스키마
-const {fWordsFilter} = require("../lib/opendict/fwordsFillter"); // 욕설 필터링
+const { fWordsFilter } = require("../lib/opendict/fwordsFillter"); // 욕설 필터링
 
 // 단어 뜻 추가
 const postWord = async (req, res) => {

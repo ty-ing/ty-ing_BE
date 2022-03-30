@@ -1,10 +1,7 @@
 module.exports = {
-  apps: [
-    {
-      name: "app",
-      script: "./app.js",
-      instances: 0,
-      exec_mode: "cluster",
-    },
-  ],
-};
+  apps : [{
+    script    : "api.js",
+    instances : "max",
+    exec_mode : "cluster"
+  }]
+}

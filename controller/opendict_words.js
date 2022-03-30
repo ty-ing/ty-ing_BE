@@ -1,5 +1,6 @@
 const Opendict = require("../models/opendict"); // 오픈사전 단어장 스키마
 const { fWordsFilter } = require("../lib/opendict/fwordsFillter"); // 욕설 필터링
+const { findOpendictMeanings } = require("../lib/opendict/findOpendictMeanings"); // 단어 뜻 조회
 
 // 단어 뜻 추가
 const postWord = async (req, res) => {
@@ -118,7 +119,7 @@ const getWordForGuest = async (req, res) => {
     }
 
     // 오픈사전 단어장 단어 뜻 조회 (게스트 용)
-    const findMeanings = await findGuestMeanings(scriptId, word);
+    const findMeanings = await findOpendictMeanings(options = {scriptId, word});
 
     // 조회
     res.json({
@@ -147,7 +148,7 @@ const getWordForUser = async (req, res) => {
     }
 
     // 오픈사전 단어장 단어 뜻 조회 (로그인 유저용)
-    let findMeanings = await findUserMeanings(scriptId, word, nickname);
+    let findMeanings = await findOpendictMeanings(options = {scriptId, word, nickname});
 
     // 조회
     res.json({
@@ -239,84 +240,6 @@ const deleteWord = async (req, res) => {
     console.error(`${error} 에러로 단어 뜻 삭제 실패`);
   }
 };
-
-// function : 오픈사전 단어장 단어 뜻 조회 (게스트 용) -> isLike, isDislike가 기본 false
-async function findGuestMeanings(scriptId, word) {
-  return await Opendict.aggregate([
-    { $match: { scriptId, word } },
-    {
-      $project: {
-        _id: 0,
-        meaning: 1,
-        nickname: 1,
-        likeCount: 1,
-        dislikeCount: 1,
-        count: 1,
-        wordId: 1,
-      },
-    },
-    { $sort: { count: -1 } },
-    {
-      $project: {
-        count: 0,
-      },
-    },
-    {
-      $addFields: {
-        isLike: false,
-        isDislike: false,
-      },
-    },
-  ]);
-}
-
-// function : 오픈사전 단어장 단어 뜻 조회 (로그인 유저용)
-async function findUserMeanings(scriptId, word, nickname) {
-  let findMeanings = await Opendict.aggregate([
-    { $match: { scriptId, word } },
-    {
-      $project: {
-        _id: 0,
-        meaning: 1,
-        nickname: 1,
-        likeCount: 1,
-        dislikeCount: 1,
-        count: 1,
-        wordId: 1,
-      },
-    },
-    { $sort: { count: -1 } },
-    {
-      $project: {
-        count: 0,
-      },
-    },
-  ]);
-
-  // 전체 단어 모든 조건 조회
-  const findAllMeanings = await Opendict.aggregate([
-    { $match: { scriptId, word } },
-    { $sort: { count: -1 } },
-  ]);
-
-  // 유저가 like를 했는지 찾아서 모으기
-  const findIsLike = findAllMeanings.map((meaning, idx) => {
-    return meaning.likeList.includes(nickname);
-  });
-
-  // 유저가 dislike를 했는지 찾아서 모으기
-  const findIsDislike = findAllMeanings.map((meaning, idx) => {
-    return meaning.dislikeList.includes(nickname);
-  });
-
-  // isLike, disLike 추가
-  findMeanings.map((meaning, idx) => {
-    meaning.isLike = findIsLike[idx];
-    meaning.isDisLike = findIsDislike[idx];
-    return meaning;
-  });
-  return findMeanings;
-}
 
 module.exports = {
   //오픈사전 단어장

@@ -33,6 +33,15 @@ function postWord() {
       let dislikeCount = 0;
       let count = 0;
 
+      // 단어 뜻 첫자리 공백 검사
+      const regexSpace = /^\s(\S*|\s)/;
+      if (regexSpace.test(meaning)) {
+        return res.json({
+          ok: false,
+          errorMessage: "첫 자리 공백은 허용되지 않습니다.",
+        });
+      }
+
       // 단어 뜻을 입력하지 않았을 경우 뜻 추가 불가
       if (!word || !meaning) {
         return res.json({
@@ -87,10 +96,10 @@ function postWord() {
       }
 
       // 단어 뜻 20자리 이하만 입력 가능
-      const regex = /^.{1,20}$/; // 영,한 상관없이 20자리
+      const regexRange = /^.{1,20}$/; // 영,한 상관없이 20자리
 
-      // const regex = /^[ㄱ-ㅎㅏ-ㅣ가-힣\s]{1,20}$/; // 공백 가능, 한글만 10자리까지
-      if (!regex.test(meaning)) {
+      // const regexRange = /^[ㄱ-ㅎㅏ-ㅣ가-힣\s]{1,20}$/; // 공백 가능, 한글만 10자리까지
+      if (!regexRange.test(meaning)) {
         return res.json({
           ok: false,
           errorMessage: "단어 뜻을 20자 이내로 입력하세요",
@@ -213,6 +222,23 @@ function putWord() {
         });
       }
 
+      // 단어 뜻 첫자리 공백 검사
+      const regexSpace = /^\s(\S*|\s)/;
+      if (regexSpace.test(meaning)) {
+        return res.json({
+          ok: false,
+          errorMessage: "첫 자리 공백은 허용되지 않습니다.",
+        });
+      }
+
+      // 단어 뜻을 입력하지 않았을 경우 뜻 추가 불가
+      if (!word || !meaning) {
+        return res.json({
+          ok: false,
+          errorMessage: "단어 뜻을 입력하지 않았습니다.",
+        });
+      }
+
       // 욕설 필터링
       const isFword = await fWordsFilter(meaning);
 
@@ -234,6 +260,17 @@ function putWord() {
         return res.json({
           ok: false,
           errorMessage: "이미 있는 단어 뜻입니다.",
+        });
+      }
+
+      // 단어 뜻 20자리 이하만 입력 가능
+      const regexRange = /^.{1,20}$/; // 영,한 상관없이 20자리
+
+      // const regexRange = /^[ㄱ-ㅎㅏ-ㅣ가-힣\s]{1,20}$/; // 공백 가능, 한글만 10자리까지
+      if (!regexRange.test(meaning)) {
+        return res.json({
+          ok: false,
+          errorMessage: "단어 뜻을 20자 이내로 입력하세요",
         });
       }
 

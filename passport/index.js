@@ -16,8 +16,6 @@ module.exports = () => {
         // accessToken, refreshToken: 로그인 성공 후 카카오가 보내준 토큰
         // profile: 카카오가 보내준 유저 정보. profile의 정보를 바탕으로 회원가입
         async (accessToken, refreshToken, profile, done) => {
-          console.log("토큰 :", accessToken);
-          console.log("kakao profile", profile);
           try {
             const exUser = await Users.findOne({
               // 카카오 플랫폼에서 로그인 했고 & snsId필드에 카카오 아이디가 일치할경우

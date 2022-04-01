@@ -8,7 +8,7 @@ const {
   scriptDetail,
   searchScripts,
 } = require("../controller/script");
-const postScript = require("../migration/insert_Scripts");
+const postScript = require("../admin/insert_Scripts");
 
 router.post("/script", postScript.postScript);
 router.get("/script/:scriptType/:scriptCategory", findScript);

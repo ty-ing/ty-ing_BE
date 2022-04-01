@@ -146,7 +146,7 @@ const login = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ id: user.id, nickname: user.nickname }, process.env.TOKENKEY, { expiresIn: '24h'}); // 사용자를 구분하기 위해서 id를 JWT에 저장해주고 토큰 생성
+    const token = jwt.sign({ id: user.id, nickname: user.nickname }, process.env.TOKENKEY, { expiresIn: '2h'}); // 사용자를 구분하기 위해서 id를 JWT에 저장해주고 토큰 생성
     console.log(user.id);
     res.json({
       ok: true,
@@ -189,7 +189,7 @@ const kakaoCallback = (req, res, next) => {
     (err, user, info) => {
       if (err) return next(err);
       const { id, nickname } = user;
-      const token = jwt.sign({ id, nickname }, process.env.TOKENKEY, { expiresIn: '24h'});
+      const token = jwt.sign({ id, nickname }, process.env.TOKENKEY, { expiresIn: '2h'});
       result = {
         token,
         id: user.id,

@@ -29,7 +29,7 @@ const cors = require("cors");
 // };
 
 // app.use(cors(corsOption));
-//.
+//..
 
 app.use(cors());
 passportConfig();

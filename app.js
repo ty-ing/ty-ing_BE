@@ -4,7 +4,7 @@ const app = express();
 
 const cors = require("cors");
 const corsOption = {
-  origin: ["https://ty-ing.com",`http://localhost:${process.env.PORT}`],
+  origin: ["https://ty-ing.com",`http://localhost:${process.env.PORT}`, `${process.env.SERVER_URL}`],
 };
 const helmet = require("helmet");
 const hpp = require("hpp");

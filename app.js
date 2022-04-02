@@ -1,21 +1,24 @@
 require("dotenv").config(); // 환경변수
+const passportConfig = require("./passport");
 const express = require("express");
 const app = express();
+const helmet = require("helmet");
+const hpp = require("hpp");
+
+const connect = require("./models");
+connect();
 
 const cors = require("cors");
 const corsOption = {
-  origin: ["https://ty-ing.com",`http://localhost:${process.env.PORT}`, `${process.env.SERVER_URL}`],
+  origin: ["https://ty-ing.com",`http://localhost:${process.env.PORT}`],
 };
-const helmet = require("helmet");
-const hpp = require("hpp");
-const connect = require("./models");
-const passportConfig = require("./passport");
+app.use(cors(corsOption));
 
 app.use(cors());
+passportConfig();
+
 app.use(helmet());
 app.use(hpp());
-connect();
-passportConfig();
 
 //Request 로그 남기는 미들웨어
 const requestMiddleware = (req, res, next) => {
@@ -45,6 +48,7 @@ const opendictWordsRouter = require("./routes/opendict_words");
 const opendictLikeDislikeRouter = require("./routes/opendict_likeDislike");
 const mydictRouter = require("./routes/mydict")
 const myScriptsRouter = require("./routes/myScripts")
+
 
 app.use("/api", [scriptRouter]);
 app.use("/api", [myScriptsRouter])

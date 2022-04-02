@@ -1,10 +1,11 @@
 require("dotenv").config(); // 환경변수
 const express = require("express");
 const app = express();
+const port = 3000;
 
 const cors = require("cors");
 const corsOption = {
-  origin: ["https://ty-ing.com", `http://localhost:${Number(process.env.PORT)}`],
+  origin: ["https://ty-ing.com", `http://localhost:${port}`],
 };
 const helmet = require("helmet");
 const hpp = require("hpp");
@@ -63,7 +64,7 @@ app.get("/statusCheck", (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`listening at http://localhost:${Number(process.env.PORT)}`);
+  console.log(`listening at http://localhost:${port}`);
 });
 
 

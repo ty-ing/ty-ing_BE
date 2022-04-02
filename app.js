@@ -23,12 +23,12 @@ const cors = require("cors");
 // }; 
 // app.use(cors(corsOptions));
 
-// const corsOption = {
-//   origin: "https://ty-ing.com",
-//   credentials: true,
-// };
+const corsOption = {
+  origin: "https://ty-ing.com",
+  // credentials: true,
+};
 
-// app.use(cors(corsOption));
+app.use(cors(corsOption));
 
 app.use(cors());
 passportConfig();

@@ -10,29 +10,11 @@ const connect = require("./models");
 connect();
 
 const cors = require("cors");
-
-// const whitelist = ["https://ty-ing.com/"];
-// const corsOptions = {
-//   origin: function (origin, callback) {
-//     if (whitelist.indexOf(origin) !== -1) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error("Not Allowed Origin!"));
-//     }
-//   },
-// }; 
-// app.use(cors(corsOptions));
-
 const corsOption = {
   origin: ["https://ty-ing.com", `http://localhost:${port}`],
-  // credentials: true,
 };
-
 app.use(cors(corsOption));
-//...
-//실험55
 
-// app.use(cors());
 passportConfig();
 
 app.use(helmet());

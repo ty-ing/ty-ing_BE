@@ -11,7 +11,7 @@ connect();
 
 const cors = require("cors");
 const corsOption = {
-  origin: ["https://ty-ing.com", `http://localhost:${parseInt(port)}`],
+  origin: ["https://ty-ing.com", `http://localhost:${parseInt(process.env.PORT)}`],
 };
 app.use(cors(corsOption));
 
@@ -67,7 +67,7 @@ app.get("/statusCheck", (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`listening at http://localhost:${parseInt(port)}`);
+  console.log(`listening at http://localhost:${parseInt(process.env.PORT)}`);
 });
 
 

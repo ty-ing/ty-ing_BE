@@ -2,6 +2,7 @@ require("dotenv").config(); // 환경변수
 const passportConfig = require("./passport");
 const express = require("express");
 const app = express();
+const port = 3000;
 const helmet = require("helmet");
 const hpp = require("hpp");
 
@@ -10,7 +11,7 @@ connect();
 
 const cors = require("cors");
 const corsOption = {
-  origin: ["https://ty-ing.com", `http://localhost:${Number(process.env.PORT)}`],
+  origin: ["https://ty-ing.com", `http://localhost:${port}`],
 };
 app.use(cors(corsOption));
 
@@ -66,7 +67,7 @@ app.get("/statusCheck", (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`listening at http://localhost:${Number(process.env.PORT)}`);
+  console.log(`listening at http://localhost:${port}`);
 });
 
 

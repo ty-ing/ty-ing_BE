@@ -30,7 +30,7 @@ const cors = require("cors");
 
 // app.use(cors(corsOption));
 //...
-//실험
+//실험22
 
 app.use(cors());
 passportConfig();

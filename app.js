@@ -4,7 +4,7 @@ const app = express();
 
 const cors = require("cors");
 const corsOption = {
-  origin: ["https://ty-ing.com", `http://localhost:${parseInt(process.env.PORT)}`],
+  origin: ["https://ty-ing.com", `http://localhost:${Number(process.env.PORT)}`],
 };
 const helmet = require("helmet");
 const hpp = require("hpp");
@@ -62,8 +62,8 @@ app.get("/statusCheck", (req, res) => {
   res.send("healthy")
 })
 
-app.listen(port, () => {
-  console.log(`listening at http://localhost:${parseInt(process.env.PORT)}`);
+app.listen(Number(process.env.PORT), () => {
+  console.log(`listening at http://localhost:${Number(process.env.PORT)}`);
 });
 
 

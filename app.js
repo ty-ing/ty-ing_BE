@@ -1,40 +1,21 @@
 require("dotenv").config(); // 환경변수
-const passportConfig = require("./passport");
 const express = require("express");
 const app = express();
-const port = 3000;
-const helmet = require("helmet");
-const hpp = require("hpp");
-
-const connect = require("./models");
-connect();
 
 const cors = require("cors");
-
-// const whitelist = ["https://ty-ing.com/"];
-// const corsOptions = {
-//   origin: function (origin, callback) {
-//     if (whitelist.indexOf(origin) !== -1) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error("Not Allowed Origin!"));
-//     }
-//   },
-// }; 
-// app.use(cors(corsOptions));
-
 const corsOption = {
-  origin: ["https://ty-ing.com",`http://localhost:${port}`],
-  credentials: true,
+  origin: ["https://ty-ing.com",`http://localhost:${process.env.PORT}`],
 };
+const helmet = require("helmet");
+const hpp = require("hpp");
+const connect = require("./models");
+const passportConfig = require("./passport");
 
 app.use(cors(corsOption));
-
-app.use(cors());
-passportConfig();
-
 app.use(helmet());
 app.use(hpp());
+connect();
+passportConfig();
 
 //Request 로그 남기는 미들웨어
 const requestMiddleware = (req, res, next) => {
@@ -65,7 +46,6 @@ const opendictLikeDislikeRouter = require("./routes/opendict_likeDislike");
 const mydictRouter = require("./routes/mydict")
 const myScriptsRouter = require("./routes/myScripts")
 
-
 app.use("/api", [scriptRouter]);
 app.use("/api", [myScriptsRouter])
 app.use("/api", [usersRouter]);
@@ -83,5 +63,5 @@ app.get("/statusCheck", (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`listening at http://localhost:${port}`);
+  console.log(`listening at http://localhost:${process.env.PORT}`);
 });

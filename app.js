@@ -29,7 +29,8 @@ const cors = require("cors");
 // };
 
 // app.use(cors(corsOption));
-//..
+//...
+//실험
 
 app.use(cors());
 passportConfig();

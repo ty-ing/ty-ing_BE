@@ -34,10 +34,9 @@ const requestMiddleware = (req, res, next) => {
 app.use(requestMiddleware); // request log
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(express.static("views"));
 
+app.set("view engine", "ejs");
 app.engine("html", require("ejs").renderFile);
-app.set("view engine", "html");
 
 const scriptRouter = require("./routes/script");
 const usersRouter = require("./routes/users");

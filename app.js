@@ -11,7 +11,7 @@ const hpp = require("hpp");
 const connect = require("./models");
 const passportConfig = require("./passport");
 
-app.use(cors(corsOption));
+app.use(cors());
 app.use(helmet());
 app.use(hpp());
 connect();

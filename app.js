@@ -2,6 +2,7 @@ require("dotenv").config(); // 환경변수
 const passportConfig = require("./passport");
 const express = require("express");
 const app = express();
+const port = 3000;
 const helmet = require("helmet");
 const hpp = require("hpp");
 
@@ -9,10 +10,25 @@ const connect = require("./models");
 connect();
 
 const cors = require("cors");
-const corsOption = {
-  origin: ["https://ty-ing.com",`http://localhost:${process.env.PORT}`],
-};
-app.use(cors(corsOption));
+
+// const whitelist = ["https://ty-ing.com/"];
+// const corsOptions = {
+//   origin: function (origin, callback) {
+//     if (whitelist.indexOf(origin) !== -1) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error("Not Allowed Origin!"));
+//     }
+//   },
+// }; 
+// app.use(cors(corsOptions));
+
+// const corsOption = {
+//   origin: "https://ty-ing.com/",
+//   credentials: true,
+// };
+
+// app.use(cors(corsOption));
 
 app.use(cors());
 passportConfig();
@@ -67,5 +83,5 @@ app.get("/statusCheck", (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`listening at http://localhost:${process.env.PORT}`);
+  console.log(`listening at http://localhost:${port}`);
 });

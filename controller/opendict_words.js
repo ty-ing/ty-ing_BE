@@ -129,7 +129,7 @@ function postWord() {
       });
 
       // 사용자가 나만의 단어장에 이 단어를 저장했는지?
-      const findMydictWord = await Mydict.find({scriptId, word});
+      const findMydictWord = await Mydict.find({nickname, scriptId, word});
       const isSavedMydict = Boolean(findMydictWord.length);
 
       res.json({
@@ -287,7 +287,7 @@ function putWord() {
       );
 
       // 사용자가 나만의 단어장에 이 단어를 저장했는지?
-      const findMydictWord = await Mydict.find({scriptId, word});
+      const findMydictWord = await Mydict.find({nickname, scriptId, word});
       const isSavedMydict = Boolean(findMydictWord.length);
 
       res.json({ ok: true, message: "단어 뜻 수정 성공", isSavedMydict });

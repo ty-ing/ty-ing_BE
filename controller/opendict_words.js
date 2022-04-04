@@ -333,7 +333,7 @@ function deleteWord() {
       const findMydictWord = await Mydict.find({ scriptId, word });
       const findOpendictWord = await Opendict.find({ scriptId, word });
 
-      if (findMydictWord && findOpendictWord.length === 1) {
+      if (findMydictWord.length > 0 && findOpendictWord.length === 1) {
         return res.json({
           ok: false,
           errorMessage:

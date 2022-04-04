@@ -330,7 +330,7 @@ function deleteWord() {
         });
       }
 
-      await Opendict.deleteOne({ scriptId, wordId });
+      await Opendict.deleteOne({ scriptId, word, wordId });
 
       res.json({ ok: true, message: "단어 뜻 삭제 성공" });
     } catch (error) {

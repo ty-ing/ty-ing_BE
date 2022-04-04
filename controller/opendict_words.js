@@ -1,7 +1,9 @@
 const Opendict = require("../models/opendict"); // 오픈사전 단어장 스키마
 const Mydict = require("../models/mydict"); // 나만의 단어장 스키마
 const { fWordsFilter } = require("../lib/opendict/fwordsFillter"); // 욕설 필터링
-const { findOpendictMeanings } = require("../lib/opendict/findOpendictMeanings"); // 단어 뜻 조회
+const {
+  findOpendictMeanings,
+} = require("../lib/opendict/findOpendictMeanings"); // 단어 뜻 조회
 
 // 오픈사전 단어장
 // 단어 뜻 추가
@@ -311,8 +313,12 @@ function deleteWord() {
       const findMeaning = await Opendict.findOne({ scriptId, wordId }); // 입력 받은 단어 뜻 필드 찾기
 
       // 오픈사전 단어장에 등록하지 않은 단어이거나, 이미 삭제 했을 때
-      if(!findMeaning) {
-        return res.json({ok : false, errorMessage: "단어를 등록하지 않으셨거나 이미 단어를 삭제하셨습니다."})
+      if (!findMeaning) {
+        return res.json({
+          ok: false,
+          errorMessage:
+            "단어를 등록하지 않으셨거나 이미 단어를 삭제하셨습니다.",
+        });
       }
 
       // 본인이 등록한 단어 뜻만 삭제 가능
@@ -327,17 +333,26 @@ function deleteWord() {
       const findMydictWord = await Mydict.find({ scriptId, word });
       const findOpendictWord = await Opendict.find({ scriptId, word });
 
-      if (findMydictWord && (findOpendictWord.length === 1)) {
+      if (findMydictWord && findOpendictWord.length === 1) {
         return res.json({
           ok: false,
           errorMessage:
             "이미 나만의 단어장에 단어를 저장한 사용자가 있어 삭제할 수 없습니다.",
+          findMydictWord,
+          findOpendictWord,
+          findOpendictWordLength: findOpendictWord.length,
         });
       }
 
       await Opendict.deleteOne({ scriptId, wordId });
 
-      res.json({ ok: true, message: "단어 뜻 삭제 성공", findMydictWord, findOpendictWord, findOpendictWordLength : findOpendictWord.length });
+      res.json({
+        ok: true,
+        message: "단어 뜻 삭제 성공",
+        findMydictWord,
+        findOpendictWord,
+        findOpendictWordLength: findOpendictWord.length,
+      });
     } catch (error) {
       res.json({ ok: false, errorMessage: "단어 뜻 삭제 실패" });
       console.error(`${error} 에러로 단어 뜻 삭제 실패`);

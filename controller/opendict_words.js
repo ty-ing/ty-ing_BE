@@ -138,7 +138,7 @@ function postWord() {
         ok: true,
         message: "단어 뜻 추가 성공",
         wordId: findAddedWord.wordId,
-        findMydictWord,
+        findMydictWord: findMydictWord,
         isSavedMydict: isSavedMydict,
       });
     } catch (error) {
@@ -296,7 +296,7 @@ function putWord() {
       res.json({
         ok: true,
         message: "단어 뜻 수정 성공",
-        findMydictWord,
+        findMydictWord: findMydictWord,
         isSavedMydict: isSavedMydict,
       });
     } catch (error) {

@@ -310,23 +310,23 @@ function deleteWord() {
 
       const findMeaning = await Opendict.findOne({ scriptId, wordId }); // 입력 받은 단어 뜻 필드 찾기
 
-      // 이미 나만의 단어장에 단어를 저장한 사용자가 있는 경우 오픈사전 단어장에서 남아 있는 단어 뜻이 하나 밖에 없는 상황에서는 삭제 불가
-      const findMydictWord = await Mydict.find({ scriptId, word });
-      const findOpendictWord = await Opendict.find({ scriptId, word });
-
-      if ((findMydictWord && findOpendictWord.length === 1)) {
-        return res.json({
-          ok: false,
-          errorMessage:
-            "이미 나만의 단어장에 단어를 저장한 사용자가 있어 삭제할 수 없습니다.",
-        });
-      }
-
       // 본인이 등록한 단어 뜻만 삭제 가능
       if (nickname !== findMeaning.nickname) {
         return res.json({
           ok: false,
           errorMessage: "다른 사용자의 단어 뜻은 삭제할 수 없습니다.",
+        });
+      }
+
+      // 이미 나만의 단어장에 단어를 저장한 사용자가 있는 경우 오픈사전 단어장에서 남아 있는 단어 뜻이 하나 밖에 없는 상황에서는 삭제 불가
+      const findMydictWord = await Mydict.find({ scriptId, word });
+      const findOpendictWord = await Opendict.find({ scriptId, word });
+
+      if (findMydictWord && findOpendictWord.length === 1) {
+        return res.json({
+          ok: false,
+          errorMessage:
+            "이미 나만의 단어장에 단어를 저장한 사용자가 있어 삭제할 수 없습니다.",
         });
       }
 

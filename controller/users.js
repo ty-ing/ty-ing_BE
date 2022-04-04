@@ -147,7 +147,6 @@ const login = async (req, res) => {
     }
 
     const token = jwt.sign({ id: user.id, nickname: user.nickname }, process.env.TOKENKEY, { expiresIn: '2h'}); // 사용자를 구분하기 위해서 id를 JWT에 저장해주고 토큰 생성
-    console.log(user.id);
     res.json({
       ok: true,
       message: "로그인이 성공적으로 완료되었습니다.",

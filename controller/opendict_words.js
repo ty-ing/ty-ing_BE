@@ -138,7 +138,8 @@ function postWord() {
         ok: true,
         message: "단어 뜻 추가 성공",
         wordId: findAddedWord.wordId,
-        isSavedMydict,
+        findMydictWord,
+        isSavedMydict: isSavedMydict,
       });
     } catch (error) {
       res.json({ ok: false, errorMessage: "단어 뜻 추가 실패" });
@@ -292,7 +293,12 @@ function putWord() {
       const findMydictWord = await Mydict.find({ nickname, scriptId, word });
       const isSavedMydict = findMydictWord.length === 0 ? false : true;
 
-      res.json({ ok: true, message: "단어 뜻 수정 성공", isSavedMydict });
+      res.json({
+        ok: true,
+        message: "단어 뜻 수정 성공",
+        findMydictWord,
+        isSavedMydict: isSavedMydict,
+      });
     } catch (error) {
       res.json({ ok: false, errorMessage: "단어 뜻 수정 실패" });
       console.error(`${error} 에러로 단어 뜻 수정 실패`);

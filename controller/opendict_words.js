@@ -283,17 +283,18 @@ function putWord() {
         });
       }
 
+      // 사용자가 나만의 단어장에 이 단어를 저장했는지?
+      const findMydictWord = await Mydict.find({ nickname, scriptId, word });
+      const isSavedMydict = findMydictWord.length === 0 ? false : true;
+      console.log(findMydictWord);
+      console.log(isSavedMydict);
+      console.log(word);
+
       // 수정
       await Opendict.updateOne(
         { scriptId, wordId },
         { $set: { meaning: meaning } }
       );
-
-      // 사용자가 나만의 단어장에 이 단어를 저장했는지?
-      const findMydictWord = await Mydict.find({ nickname, scriptId, word });
-      const isSavedMydict = findMydictWord.length === 0 ? false : true;
-      console.log(findMydictWord)
-      console.log(isSavedMydict)
 
       res.json({
         ok: true,

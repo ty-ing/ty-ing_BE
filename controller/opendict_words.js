@@ -338,21 +338,12 @@ function deleteWord() {
           ok: false,
           errorMessage:
             "이미 나만의 단어장에 단어를 저장한 사용자가 있어 삭제할 수 없습니다.",
-          findMydictWord,
-          findOpendictWord,
-          findOpendictWordLength: findOpendictWord.length,
         });
       }
 
       await Opendict.deleteOne({ scriptId, wordId });
 
-      res.json({
-        ok: true,
-        message: "단어 뜻 삭제 성공",
-        findMydictWord,
-        findOpendictWord,
-        findOpendictWordLength: findOpendictWord.length,
-      });
+      res.json({ ok: true, message: "단어 뜻 삭제 성공" });
     } catch (error) {
       res.json({ ok: false, errorMessage: "단어 뜻 삭제 실패" });
       console.error(`${error} 에러로 단어 뜻 삭제 실패`);

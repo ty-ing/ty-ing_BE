@@ -322,7 +322,7 @@ function deleteWord() {
       const findMydictWord = await Mydict.find({ scriptId, word });
       const findOpendictWord = await Opendict.find({ scriptId, word });
 
-      if (findMydictWord && findOpendictWord.length === 1) {
+      if (findMydictWord && (findOpendictWord.length === 1)) {
         return res.json({
           ok: false,
           errorMessage:
@@ -330,7 +330,7 @@ function deleteWord() {
         });
       }
 
-      await Opendict.deleteOne({ scriptId, wordId });
+      // await Opendict.deleteOne({ scriptId, wordId });
 
       res.json({ ok: true, message: "단어 뜻 삭제 성공" });
     } catch (error) {

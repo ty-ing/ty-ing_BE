@@ -1,9 +1,7 @@
 const Opendict = require("../models/opendict"); // 오픈사전 단어장 스키마
 const Mydict = require("../models/mydict"); // 나만의 단어장 스키마
 const { fWordsFilter } = require("../lib/opendict/fwordsFillter"); // 욕설 필터링
-const {
-  findOpendictMeanings,
-} = require("../lib/opendict/findOpendictMeanings"); // 단어 뜻 조회
+const { findOpendictMeanings } = require("../lib/opendict/findOpendictMeanings"); // 단어 뜻 조회
 
 // 오픈사전 단어장
 // 단어 뜻 추가
@@ -138,8 +136,7 @@ function postWord() {
         ok: true,
         message: "단어 뜻 추가 성공",
         wordId: findAddedWord.wordId,
-        findMydictWord: findMydictWord,
-        isSavedMydict: isSavedMydict,
+        isSavedMydict,
       });
     } catch (error) {
       res.json({ ok: false, errorMessage: "단어 뜻 추가 실패" });
@@ -283,29 +280,20 @@ function putWord() {
         });
       }
 
-      // 사용자가 나만의 단어장에 이 단어를 저장했는지?
-      const findMydictWord = await Mydict.find({ nickname, scriptId, word });
-      const isSavedMydict = findMydictWord.length === 0 ? false : true;
-      console.log(findMydictWord);
-      console.log(isSavedMydict);
-      console.log(nickname)
-      console.log(scriptId)
-      console.log(word);
-
       // 수정
       await Opendict.updateOne(
         { scriptId, wordId },
         { $set: { meaning: meaning } }
       );
 
+       // 사용자가 나만의 단어장에 이 단어를 저장했는지?
+       const findMydictWord = await Mydict.find({ nickname, scriptId, word });
+       const isSavedMydict = findMydictWord.length === 0 ? false : true;
+
       res.json({
         ok: true,
         message: "단어 뜻 수정 성공",
-        findMydictWord: findMydictWord,
-        isSavedMydict: isSavedMydict,
-        scriptId,
-        word,
-        nickname
+        isSavedMydict,
       });
     } catch (error) {
       res.json({ ok: false, errorMessage: "단어 뜻 수정 실패" });

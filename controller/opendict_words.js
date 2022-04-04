@@ -34,10 +34,6 @@ function postWord() {
       let dislikeCount = 0;
       let count = 0;
 
-      // 사용자가 나만의 단어장에 이 단어를 저장했는지?
-      const findMydictWord = await Mydict.find({ nickname, scriptId, word });
-      const isSavedMydict = findMydictWord.length === 0 ? false : true;
-
       // 단어 뜻 첫자리 공백 검사
       const regexSpace = /^\s(\S*|\s)/;
       if (regexSpace.test(meaning)) {
@@ -132,6 +128,10 @@ function postWord() {
         word,
       });
 
+      // 사용자가 나만의 단어장에 이 단어를 저장했는지?
+      const findMydictWord = await Mydict.find({ nickname, scriptId, word });
+      const isSavedMydict = findMydictWord.length === 0 ? false : true;
+
       res.json({
         ok: true,
         message: "단어 뜻 추가 성공",
@@ -220,10 +220,6 @@ function putWord() {
       const findMeanings = await Opendict.find({ scriptId, word }); // 단어가 일치하는 필드 여러개 찾기
       const findMeaning = await Opendict.findOne({ scriptId, wordId }); // 입력 받은 단어 뜻 필드 하나 찾기
 
-      // 사용자가 나만의 단어장에 이 단어를 저장했는지?
-      const findMydictWord = await Mydict.find({ nickname, scriptId, word });
-      const isSavedMydict = findMydictWord.length === 0 ? false : true;
-
       // 로그인한 사용자와 단어 뜻을 등록한 사용자가 다를 때 수정 불가 (본인이 등록한 단어 뜻만 수정 가능)
       if (nickname !== findMeaning.nickname) {
         return res.json({
@@ -289,6 +285,10 @@ function putWord() {
         { scriptId, wordId },
         { $set: { meaning: meaning } }
       );
+
+      // 사용자가 나만의 단어장에 이 단어를 저장했는지?
+      const findMydictWord = await Mydict.find({ nickname, scriptId, word });
+      const isSavedMydict = findMydictWord.length === 0 ? false : true;
 
       res.json({
         ok: true,

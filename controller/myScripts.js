@@ -15,7 +15,6 @@ module.exports. showMyScript = async (req, res) => {
 async function postMyScript(req, res) {
   const {scriptId} = req.params;
   const id = res.locals.user.id
-  console.log(scriptId, id)
   const checkMyScripts = await MyScripts.findOne({
     scriptId: scriptId,
     userId: id,

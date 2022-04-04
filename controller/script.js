@@ -26,7 +26,7 @@ module.exports.scriptDetail = async (req, res) => {
 async function scriptDetail(req, res) {
   try {
     const scriptId = req.params;
-    const script = await Script.findOne(scriptId);
+    const script = await Script.findOne(scriptId); 
     res.json({
       script,
       ok: true,
@@ -46,7 +46,6 @@ async function searchScripts(req, res) {
     const perPage = 8
     const hideScript = (page - 1) * perPage;
     const userId = res.locals.user.id;
-    console.log(res.locals.user.id)
     const targetWord = req.query.targetWord;
     const RegWord = new RegExp(targetWord, "gi");
     const targetScripts = await Script.aggregate([
@@ -166,7 +165,6 @@ async function scriptFilter(req, res) {
       });
       return;
     }
-
     res.json({
       scripts,
       ok: true,

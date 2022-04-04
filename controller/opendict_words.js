@@ -288,6 +288,8 @@ function putWord() {
       const isSavedMydict = findMydictWord.length === 0 ? false : true;
       console.log(findMydictWord);
       console.log(isSavedMydict);
+      console.log(nickname)
+      console.log(scriptId)
       console.log(word);
 
       // 수정
@@ -301,6 +303,9 @@ function putWord() {
         message: "단어 뜻 수정 성공",
         findMydictWord: findMydictWord,
         isSavedMydict: isSavedMydict,
+        scriptId,
+        word,
+        nickname
       });
     } catch (error) {
       res.json({ ok: false, errorMessage: "단어 뜻 수정 실패" });

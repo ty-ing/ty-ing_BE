@@ -310,6 +310,11 @@ function deleteWord() {
 
       const findMeaning = await Opendict.findOne({ scriptId, wordId }); // 입력 받은 단어 뜻 필드 찾기
 
+      // 오픈사전 단어장에 등록하지 않은 단어이거나, 이미 삭제 했을 때
+      if(!findMeaning) {
+        return res.json({ok : false, errorMessage: "단어를 등록하지 않으셨거나 이미 단어를 삭제하셨습니다."})
+      }
+
       // 본인이 등록한 단어 뜻만 삭제 가능
       if (nickname !== findMeaning.nickname) {
         return res.json({
@@ -332,7 +337,7 @@ function deleteWord() {
 
       await Opendict.deleteOne({ scriptId, wordId });
 
-      res.json({ ok: true, message: "단어 뜻 삭제 성공" });
+      res.json({ ok: true, message: "단어 뜻 삭제 성공", findMydictWord, findOpendictWord, findOpendictWordLength : findOpendictWord.length });
     } catch (error) {
       res.json({ ok: false, errorMessage: "단어 뜻 삭제 실패" });
       console.error(`${error} 에러로 단어 뜻 삭제 실패`);

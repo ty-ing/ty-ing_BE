@@ -24,6 +24,7 @@
     "passport-kakao": "^1.0.1"
   },
   "devDependencies": {
+    "artillery": "^2.0.0-14",
     "nodemon": "^2.0.15"
   },
   "repository": {

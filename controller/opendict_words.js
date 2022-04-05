@@ -39,7 +39,7 @@ function postWord() {
       // 단어 뜻 첫자리 공백 검사
       const regexSpace = /^\s(\S*|\s)/;
       if (regexSpace.test(meaning)) {
-        return res.status(422).json({
+        return res.json({
           ok: false,
           errorMessage: "첫 자리 공백은 허용되지 않습니다.",
         });
@@ -47,7 +47,7 @@ function postWord() {
 
       // 단어 뜻을 입력하지 않았을 경우 뜻 추가 불가
       if (!word || !meaning) {
-        return res.status(422).json({
+        return res.json({
           ok: false,
           errorMessage: "단어 뜻을 입력하지 않았습니다.",
         });
@@ -57,7 +57,7 @@ function postWord() {
       const isFword = await fWordsFilter(meaning);
 
       if (isFword) {
-        return res.status(422).json({
+        return res.json({
           ok: false,
           errorMessage:
             "욕설 혹은 올바르지 않은 뜻을 등록하는 경우 건전한 서비스 환경 제공에 어려움이 있으므로 서비스 이용이 제한될 수 있습니다.",
@@ -73,7 +73,7 @@ function postWord() {
 
       // 한 유저당 하나의 단어 뜻만 입력 가능 (여러개 입력 원하면 (ex) 맛있는, 맛이 좋은) 예시와 같이 ,로 단어 넣어야 함.)
       if (findUserMeaning) {
-        return res.status(422).json({
+        return res.json({
           ok: false,
           errorMessage: "이미 단어 뜻을 등록하셨습니다.",
         });
@@ -92,7 +92,7 @@ function postWord() {
       }
 
       if (meaningList.includes(meaning)) {
-        return res.status(422).json({
+        return res.json({
           ok: false,
           errorMessage: "이미 있는 단어 뜻 입니다.",
         });
@@ -103,7 +103,7 @@ function postWord() {
 
       // const regexRange = /^[ㄱ-ㅎㅏ-ㅣ가-힣\s]{1,20}$/; // 공백 가능, 한글만 10자리까지
       if (!regexRange.test(meaning)) {
-        return res.status(422).json({
+        return res.json({
           ok: false,
           errorMessage: "단어 뜻을 20자 이내로 입력하세요",
         });

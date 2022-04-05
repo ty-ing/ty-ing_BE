@@ -33,7 +33,7 @@ async function scriptDetail(req, res) {
     });
   } catch (err) {
     console.error(err);
-    res.status(200).send({
+    res.status(400).json({
       ok: false,
       errorMessage: "해당 값이 존재하지 않습니다.",
     });
@@ -111,7 +111,7 @@ async function searchScripts(req, res) {
     }
   } catch (err) {
     console.error(err);
-    res.status(200).send({
+    res.status(400).json({
       ok: false,
       errorMessage: "해당 값이 존재하지 않습니다.",
     });
@@ -171,7 +171,7 @@ async function scriptFilter(req, res) {
     });
   } catch (err) {
     console.error(err);
-    res.status(200).send({
+    res.status(400).json({
       ok: false,
       errorMessage: "해당 값이 존재하지 않습니다.",
     });
@@ -193,7 +193,7 @@ async function findScript(req, res) {
     })
   } catch (err) {
     console.error(err);
-    res.status(200).send({
+    res.status(400).json({
       ok: false,
       errorMessage: "해당 값이 존재하지 않습니다.",
     });

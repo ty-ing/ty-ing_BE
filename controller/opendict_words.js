@@ -172,7 +172,7 @@ function getWordForGuest() {
         opendict: findMeanings,
       });
     } catch (error) {
-      res.json({ ok: false, errorMessage: "단어 뜻 조회 실패" });
+      res.status(400).json({ ok: false, errorMessage: "단어 뜻 조회 실패" });
       console.error(`${error} 에러로 인해 단어 뜻 조회 실패`);
     }
   };
@@ -204,7 +204,7 @@ function getWordForUser() {
         opendict: findMeanings,
       });
     } catch (error) {
-      res.json({ ok: false, errorMessage: "단어 뜻 조회 실패" });
+      res.status(400).json({ ok: false, errorMessage: "단어 뜻 조회 실패" });
       console.error(`${error} 에러로 인해 단어 뜻 조회 실패`);
     }
   };
@@ -345,7 +345,7 @@ function deleteWord() {
 
       res.status(204).json({ ok: true, message: "단어 뜻 삭제 성공" });
     } catch (error) {
-      res.json({ ok: false, errorMessage: "단어 뜻 삭제 실패" });
+      res.status(400).json({ ok: false, errorMessage: "단어 뜻 삭제 실패" });
       console.error(`${error} 에러로 단어 뜻 삭제 실패`);
     }
   };

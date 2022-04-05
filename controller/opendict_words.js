@@ -341,9 +341,9 @@ function deleteWord() {
 
       await Opendict.deleteOne({ scriptId, wordId });
 
-      res.json({ ok: true, message: "단어 뜻 삭제 성공" });
+      res.json({ ok: true, message: "단어 뜻 삭제 성공", scriptId, word, nickname });
     } catch (error) {
-      res.status(400).json({ ok: false, errorMessage: "단어 뜻 삭제 실패" });
+      res.json({ ok: false, errorMessage: "단어 뜻 삭제 실패" });
       console.error(`${error} 에러로 단어 뜻 삭제 실패`);
     }
   };

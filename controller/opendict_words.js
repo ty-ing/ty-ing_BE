@@ -1,9 +1,7 @@
 const Opendict = require("../models/opendict"); // 오픈사전 단어장 스키마
 const Mydict = require("../models/mydict"); // 나만의 단어장 스키마
 const { fWordsFilter } = require("../lib/opendict/fwordsFillter"); // 욕설 필터링
-const {
-  findOpendictMeanings,
-} = require("../lib/opendict/findOpendictMeanings"); // 단어 뜻 조회
+const { findOpendictMeanings } = require("../lib/opendict/findOpendictMeanings"); // 단어 뜻 조회
 
 // 오픈사전 단어장
 // 단어 뜻 추가

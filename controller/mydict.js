@@ -69,9 +69,9 @@ function postMydict() {
         sentence,
       });
 
-      res.json({ ok: true, message: "나만의 단어장 단어 등록 성공" });
+      res.status(201).json({ ok: true, message: "나만의 단어장 단어 등록 성공" });
     } catch (error) {
-      res.json({ ok: false, errorMessage: "나만의 단어장 단어 등록 실패" });
+      res.status(400).json({ ok: false, errorMessage: "나만의 단어장 단어 등록 실패" });
       console.error(`${error} 에러로 나만의 단어장 단어 등록 실패`);
     }
   };
@@ -102,7 +102,7 @@ function getMydictSome() {
         mydict: mydictMeanings,
       });
     } catch (error) {
-      res.json({ ok: false, errorMessage: "나만의 단어장 단어 조회 실패" });
+      res.status(400).json({ ok: false, errorMessage: "나만의 단어장 단어 조회 실패" });
       console.error(`${error} 에러로 나만의 단어장 단어 조회 실패`);
     }
   };
@@ -133,7 +133,7 @@ function getMydictAll() {
         mydict: mydictMeanings,
       });
     } catch (error) {
-      res.json({ ok: false, errorMessage: "나만의 단어장 단어 조회 실패" });
+      res.status(400).json({ ok: false, errorMessage: "나만의 단어장 단어 조회 실패" });
       console.error(`${error} 에러로 나만의 단어장 단어 조회 실패`);
     }
   };
@@ -168,9 +168,9 @@ function deleteMydict() {
         word,
       });
 
-      res.json({ ok: true, message: "나만의 단어장 단어 삭제 성공" });
+      res.status(204).json({ ok: true, message: "나만의 단어장 단어 삭제 성공" });
     } catch (error) {
-      res.json({ ok: false, errorMessage: "나만의 단어장 단어 삭제 실패" });
+      res.status(400).json({ ok: false, errorMessage: "나만의 단어장 단어 삭제 실패" });
       console.error(`${error} 에러로 나만의 단어장 단어 삭제 실패`);
     }
   };

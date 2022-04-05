@@ -24,12 +24,12 @@ async function postMyScript(req, res) {
     scriptId,
     userId:id
     });
-    res.status(200).send({
+    res.status(201).json({
         ok: true,
         message : "추가가 완료되었습니다."
     })
   } else {
-    res.status(200).send({
+    res.status(200).json({
       ok: false,
       errorMessage: "이미 내 스크립트 목록에 담겨져 있습니다.",
     });
@@ -44,7 +44,7 @@ async function deleteMyScript(req, res) {
         userId: id,
       });
     if (!checkMyScripts) {
-        res.status(200).send({
+        res.status(200).json({
         ok: false,
         errorMessage: "내 스크립트 목록에 존재하지 않습니다.",
         });
@@ -53,7 +53,7 @@ async function deleteMyScript(req, res) {
                 scriptId: scriptId,
                 userId: id, 
             })
-        res.status(200).send({
+        res.status(200).json({
             ok:true,
             message: "삭제가 완료되었습니다"
         })
@@ -69,8 +69,8 @@ async function showMyScript(req, res) {
       });
 
       if (checkMyScript) {
-          res.status(200).send({saved: true})
+          res.status(200).json({saved: true})
       } else {
-          res.status(200).send({saved: false})
+          res.status(200).json({saved: false})
       }
 }   

@@ -83,7 +83,7 @@ function likeUp() {
         isDislike,
       });
     } catch (error) {
-      res.json({ ok: false, errorMessage: "좋아요 누르기 실패" });
+      res.status(400).json({ ok: false, errorMessage: "좋아요 누르기 실패" });
       console.error(`${error} 에러로 인해 좋아요 누르기 실패`);
     }
   };
@@ -138,7 +138,7 @@ function likeDown() {
         isDislike,
       });
     } catch (error) {
-      res.json({ ok: false, errorMessage: "좋아요 취소 실패" });
+      res.status(400).json({ ok: false, errorMessage: "좋아요 취소 실패" });
       console.error(`${error} 에러로 좋아요 실패`);
     }
   };
@@ -162,7 +162,7 @@ function getLike() {
         isDislike,
       });
     } catch (error) {
-      res.json({ ok: false, errorMessage: "좋아요 조회 실패" });
+      res.status(400).json({ ok: false, errorMessage: "좋아요 조회 실패" });
       console.error(`${error} 에러로 좋아요 조회 실패`);
     }
   };
@@ -231,7 +231,7 @@ function dislikeUp() {
         isDislike,
       });
     } catch (error) {
-      res.json({ ok: false, errorMessage: "싫어요 누르기 실패" });
+      res.status(400).json({ ok: false, errorMessage: "싫어요 누르기 실패" });
       console.error(`${error} 에러로 싫어요 누르기 실패`);
     }
   };
@@ -286,7 +286,7 @@ function dislikeDown() {
         isDislike,
       });
     } catch (error) {
-      res.json({ ok: false, errorMessage: "싫어요 취소 실패" });
+      res.status(400).json({ ok: false, errorMessage: "싫어요 취소 실패" });
       console.error(`${error} 에러로 싫어요 취소 실패`);
     }
   };
@@ -310,7 +310,7 @@ function getDislike() {
         isDislike,
       });
     } catch (error) {
-      res.json({ ok: false, errorMessage: "싫어요 조회 실패" });
+      res.status(400).json({ ok: false, errorMessage: "싫어요 조회 실패" });
       console.error(`${error} 에러로 싫어요 조회 실패`);
     }
   };

@@ -92,16 +92,70 @@
 
 ## 🔥 Trouble Shooting
 <details>
-<summary>1번</summary>
-- 준비 중..
+<summary><strong>부하테스트 및 성능개선</strong></summary>
+  <br/>
+  <ul>
+<li><strong>도입이유</strong>
+<p>- 안정적인 서버를 위해 부하테스트 및 성능개선 시도
+  <br/>
+<li><strong>문제상황1</strong>
+<p>- 일정 이상의 요청이 동시에 서버로 오면 서버가 버티지 못하고 정상적으로 명령을 수행하지 못함
+<p>- 총 900회의 요청 중 302회만 성공
+<p>- http.response_time이 지연되는 경우 응답까지 약 9초의 시간 발생
+<li><strong>해결방안</strong>
+<p>- 서버 성능 개선을 위해 한 단계 높은 사양의 인스턴스를 사용하여 테스트 시도
+<li><strong>의견결정</strong>
+<p>- 기존 사용하던 micro 등급의 윗 단계인 small 등급의 인스턴스들 중에서 t3a 인스턴스가 동급의 타 인스턴스 대비 비용 및 cpu사양에서 우위를 점하고 있어 t3a를 사용하여 테스트
+  <br/>
+<li><strong>문제상황2</strong>
+<p>- t3a 인스턴스 변경 이후 서버 connection 문제 발생
+<li><strong>해결방안</strong>
+<p>- 연결, 방화벽 문제의 원인이 무엇인지 탐색
+<p>- port forwarding 관련해서 기존 iptables 설정이 t2인스턴스에서는 가능했으나, t3a에 네트워크 설정에 문제를 일으키는 것으로 확인
+<li><strong>의견결정</strong>
+<p>- iptables eth설정을 전체 허용으로 변경하여 서버 연결 성공
+  <br/>
+<li><strong>결과1</strong>
+<p>- Artillery 테스트 재진행 결과, 기존에는 ‘900명 중 302명이 성공, 총 80초’가 걸렸다면, 개선 이후 ‘900명 중 900명이 성공, 총 70초’로 개선
+<p>- http:response_time의 경우 기존 대비 응답 지연시간 60% 감소
+  <br/>
+<li><strong>결과2</strong>
+<p>- 기존 CPU core 1개 -> 2개로 core수 증가하여 CPU core를 활용할 수 있게 됨  
+<p>- PM2 Cluster mode를 도입하여 서버 성능 개선 및 무중단 서비스를 지속 중
+  </ul>
 </details>
+
+  
+  
 <details>
-<summary>2번</summary>
-- 준비 중..
+<summary><strong>욕설 필터링 간소화</strong></summary>
+  <br/>
+  <ul>
+<li><strong>도입이유</strong>
+<p>- 새로운 욕설이 추가될 시 욕설 관리에 대한 문제
+<li><strong>문제상황</strong>
+<p>- DB에 욕설 collection을 생성하여 만들게 된다면 욕설 추가시마다 collection 자체에 욕설을 추가해야는 번거로움 발생
+<li><strong>해결방안</strong>
+<p>- fs(file system package)를 사용하여 욕설 파일을 불러오고 불러온 파일로 욕설 필터링 시도
+<li><strong>의견결정 및 결과</strong>
+<p>- 욕설이 추가될 경우 해당 파일만 간단히 변경하여 욕설 추가 가능하게 함
+<p>- DB에 대한 전문지식이 없는 운영인력도 쉽게 욕설 관련 내용을 파악하고 내용을 변경할 수 있게 됨
+  </ul>
 </details>
+
 <details>
-<summary>3번</summary>
-- 준비 중..
+<summary><strong>검색 시 내가 저장한 스크립트 여부 확인</strong></summary>
+  <br/>
+  <ul>
+<li><strong>도입이유</strong>
+<p>-  검색 시 유저가 저장한 스크립트인지(북마크) 프론트에 전달하기 위해서
+<li><strong>문제상황</strong>
+<p>-  검색 결과를 전달할 때 유저가 저장한 스크립트인지 분간이 되지 않음
+<li><strong>해결방안</strong>
+<p>-  MongoDB의 lookup을 활용
+<li><strong>의견결졍 및 결과</strong>
+<p>- 유저가 저장한 스크립트에 대한 데이터가 저장되는 테이블인 Myscript에서 userId가 일치하는 데이터에 addFields로 “exist”: “true” 값을 담아 전달함으로써 해결
+  </ul>
 </details>
 
 * * *

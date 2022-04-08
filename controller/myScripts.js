@@ -1,16 +1,19 @@
 const MyScripts = require("../models/myScripts");
 
+//나만의 스크립트 등록하기
 module.exports.postMyScript = async (req, res) => {
   await postMyScript(req, res);
 };
 
+// 나만의 스크립트에서 삭제하기
 module.exports.deleteMyScript = async (req, res) => {
     await deleteMyScript(req, res);
 }
 
+// 나만의 스크립트에 담겨져 있는지 여부 확인(상세페이지용)
 module.exports. showMyScript = async (req, res) => {
     await showMyScript(req, res);
-}
+} 
 
 async function postMyScript(req, res) {
   const {scriptId} = req.params;

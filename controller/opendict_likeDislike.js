@@ -1,23 +1,11 @@
-const Opendict = require("../models/opendict"); // 오픈사전 스키마
-const { updateLikeDislikeCount, isLikeIsDislike } = require("../lib/opendict/aboutLikeDislike"); // 좋아요, 싫어요 관련 함수
+const Opendict = require("../models/opendict");
+const { updateLikeDislikeCount, isLikeIsDislike } = require("../lib/opendict/aboutLikeDislike"); 
 
-// 오픈사전 단어장 좋아요, 싫어요
-// 좋아요 누르기
 module.exports.likeUp = likeUp();
-
-// 좋아요 취소
 module.exports.likeDown = likeDown();
-
-// 좋아요 조회
 module.exports.getLike = getLike();
-
-// 싫어요 누르기
 module.exports.dislikeUp = dislikeUp();
-
-// 싫어요 취소
 module.exports.dislikeDown = dislikeDown();
-
-// 싫어요 조회
 module.exports.getDislike = getDislike();
 
 function likeUp() {
@@ -26,11 +14,10 @@ function likeUp() {
       const nickname = res.locals.user.nickname;
       const { scriptId, wordId } = req.params;
 
-      const findMeaning = await Opendict.findOne({ scriptId, wordId }); // 입력 받은 단어 뜻 필드 찾기
+      const findMeaning = await Opendict.findOne({ scriptId, wordId });
       let likeList = findMeaning.likeList;
       let dislikeList = findMeaning.dislikeList;
 
-      // 본인의 단어에는 좋아요를 누를 수 없음
       if (nickname === findMeaning.nickname) {
         return res.json({
           ok: false,
@@ -38,7 +25,6 @@ function likeUp() {
         });
       }
 
-      // 좋아요 여러번 불가
       if (likeList.includes(nickname)) {
         return res.json({
           ok: false,
@@ -46,7 +32,6 @@ function likeUp() {
         });
       }
 
-      // 좋아요
       if (dislikeList.includes(nickname)) {
         await Opendict.updateOne(
           { scriptId, wordId },
@@ -66,9 +51,7 @@ function likeUp() {
         );
       }
 
-      // 좋아요 - 싫어요 count 업데이트, 개별 좋아요, 싫어요 카운트용
       const findCount = await updateLikeDislikeCount(scriptId, wordId);
-      // 사용자가 각 단어 뜻에 좋아요, 싫어요를 했는지 확인용
       const { isLike, isDislike } = await isLikeIsDislike(
         scriptId,
         wordId,
@@ -92,13 +75,12 @@ function likeUp() {
 function likeDown() {
   return async (req, res) => {
     try {
-      const nickname = res.locals.user.nickname; // 로그인한 닉네임
+      const nickname = res.locals.user.nickname;
       const { scriptId, wordId } = req.params;
 
-      const findMeaning = await Opendict.findOne({ scriptId, wordId }); // 입력 받은 단어 뜻 필드 찾기
+      const findMeaning = await Opendict.findOne({ scriptId, wordId });
       const likeList = findMeaning.likeList;
 
-      // 본인의 단어에는 좋아요를 누르거나 취소할 수 없음
       if (nickname === findMeaning.nickname) {
         return res.json({
           ok: false,
@@ -107,7 +89,6 @@ function likeDown() {
         });
       }
 
-      // 좋아요 안 눌렀거나 이미 취소 했을 때
       if (!likeList.includes(nickname)) {
         return res.json({
           ok: false,
@@ -121,9 +102,7 @@ function likeDown() {
         { $pull: { likeList: nickname }, $inc: { likeCount: -1 } }
       );
 
-      // 좋아요 - 싫어요 count 업데이트, 개별 좋아요, 싫어요 카운트용
       const findCount = await updateLikeDislikeCount(scriptId, wordId);
-      // 사용자가 각 단어 뜻에 좋아요, 싫어요를 했는지 확인용
       const { isLike, isDislike } = await isLikeIsDislike(
         scriptId,
         wordId,
@@ -150,7 +129,7 @@ function getLike() {
       const nickname = res.locals.user.nickname;
       const { scriptId, wordId } = req.params;
 
-      const findMeaning = await Opendict.findOne({ scriptId, wordId }); // 입력 받은 단어 뜻 필드 찾기
+      const findMeaning = await Opendict.findOne({ scriptId, wordId });
       const isLike = findMeaning.likeList.includes(nickname);
       const isDislike = findMeaning.dislikeList.includes(nickname);
 
@@ -174,11 +153,10 @@ function dislikeUp() {
       const nickname = res.locals.user.nickname;
       const { scriptId, wordId } = req.params;
 
-      const findMeaning = await Opendict.findOne({ scriptId, wordId }); // 입력 받은 단어 뜻 필드 찾기
+      const findMeaning = await Opendict.findOne({ scriptId, wordId });
       const likeList = findMeaning.likeList;
       const dislikeList = findMeaning.dislikeList;
 
-      // 본인의 단어에는 싫어요를 누를 수 없음
       if (nickname === findMeaning.nickname) {
         return res.json({
           ok: false,
@@ -186,7 +164,6 @@ function dislikeUp() {
         });
       }
 
-      // 싫어요 여러번 불가
       if (dislikeList.includes(nickname)) {
         return res.json({
           ok: false,
@@ -194,7 +171,6 @@ function dislikeUp() {
         });
       }
 
-      // 싫어요
       if (likeList.includes(nickname)) {
         await Opendict.updateOne(
           { scriptId, wordId },
@@ -214,9 +190,7 @@ function dislikeUp() {
         );
       }
 
-      // 좋아요 - 싫어요 count 업데이트, 개별 좋아요, 싫어요 카운트용
       const findCount = await updateLikeDislikeCount(scriptId, wordId);
-      // 사용자가 각 단어 뜻에 좋아요, 싫어요를 했는지 확인용
       const { isLike, isDislike } = await isLikeIsDislike(
         scriptId,
         wordId,
@@ -245,7 +219,7 @@ function dislikeDown() {
       console.log(scriptId);
       console.log(wordId);
 
-      const findMeaning = await Opendict.findOne({ scriptId, wordId }); // 입력 받은 단어 뜻 필드 찾기
+      const findMeaning = await Opendict.findOne({ scriptId, wordId });
       const dislikeList = findMeaning.dislikeList;
 
       if (nickname === findMeaning.nickname) {
@@ -269,9 +243,7 @@ function dislikeDown() {
         { $pull: { dislikeList: nickname }, $inc: { dislikeCount: -1 } }
       );
 
-      // 좋아요 - 싫어요 count 업데이트, 개별 좋아요, 싫어요 카운트용
       const findCount = await updateLikeDislikeCount(scriptId, wordId);
-      // 사용자가 각 단어 뜻에 좋아요, 싫어요를 했는지 확인용
       const { isLike, isDislike } = await isLikeIsDislike(
         scriptId,
         wordId,
@@ -298,7 +270,7 @@ function getDislike() {
       const nickname = res.locals.user.nickname;
       const { scriptId, wordId } = req.params;
 
-      const findMeaning = await Opendict.findOne({ scriptId, wordId }); // 입력 받은 단어 뜻 필드 찾기
+      const findMeaning = await Opendict.findOne({ scriptId, wordId });
       const isLike = findMeaning.likeList.includes(nickname);
       const isDislike = findMeaning.dislikeList.includes(nickname);
 
